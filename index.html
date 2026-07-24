@@ -68,7 +68,7 @@
 
   .card {
     background: var(--surface); border: 1px solid var(--line);
-    border-radius: var(--radius); overflow: hidden;
+    border-radius: var(--radius); overflow-x: auto;
   }
 
   table { width: 100%; border-collapse: collapse; }
@@ -98,6 +98,51 @@
   }
   select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+  .delete-button {
+    padding: .35rem .55rem;
+    border-color: #efb4b4;
+    color: #b42318;
+    background: #fff;
+    font-size: .78rem;
+  }
+  .delete-button:hover { border-color: #b42318; background: #b42318; }
+
+  dialog {
+    width: min(440px, calc(100% - 2rem));
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 14px;
+    color: var(--ink);
+    background: var(--surface);
+    box-shadow: 0 24px 70px rgba(17, 24, 39, .22);
+  }
+  dialog::backdrop { background: rgba(17, 24, 39, .5); }
+
+  .dialog-head {
+    display: flex; align-items: start; justify-content: space-between; gap: 1rem;
+    padding: 1.2rem 1.3rem; border-bottom: 1px solid var(--line);
+  }
+  .dialog-head h2 { margin: 0; font-size: 1.1rem; }
+  .dialog-head p { margin: .2rem 0 0; color: var(--muted); font-size: .82rem; }
+  .close-button {
+    width: 34px; height: 34px; padding: 0;
+    border-color: var(--line); color: var(--muted); background: #fff;
+    font-size: 1.15rem;
+  }
+
+  .client-form { display: grid; gap: 1rem; padding: 1.25rem 1.3rem 1.3rem; }
+  .field { display: grid; gap: .35rem; }
+  .field label { font-size: .78rem; font-weight: 650; }
+  .field input, .field select {
+    width: 100%; padding: .6rem .7rem; border: 1px solid var(--line);
+    border-radius: 8px; color: var(--ink); background: #fff;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent); outline: 3px solid rgba(13, 148, 136, .12);
+  }
+  .form-actions { display: flex; justify-content: end; gap: .6rem; padding-top: .2rem; }
+
   .log {
     margin-top: 1.25rem; background: #12151c; color: #cfd6e0;
     border-radius: var(--radius); padding: .9rem 1rem;
@@ -122,6 +167,7 @@
   </header>
 
   <div class="bar">
+    <button id="btn-novo-cliente">Novo cliente</button>
     <button id="btn-importar">Importar clientes</button>
     <a class="button-link secondary" href="catalogo.html">Acessar catálogo</a>
   </div>
@@ -129,7 +175,7 @@
   <div class="card">
     <table>
       <thead>
-        <tr><th>Nome</th><th>Plano</th><th>Status</th><th>Alterar</th></tr>
+        <tr><th>Nome</th><th>Plano</th><th>Status</th><th>Alterar</th><th>Ações</th></tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -140,6 +186,42 @@
     <div id="log"></div>
   </div>
 </div>
+
+<dialog id="client-dialog" aria-labelledby="client-dialog-title">
+  <div class="dialog-head">
+    <div>
+      <h2 id="client-dialog-title">Novo cliente</h2>
+      <p>Cadastre um cliente na sua base.</p>
+    </div>
+    <button class="close-button" id="btn-fechar-cliente" type="button" aria-label="Fechar">×</button>
+  </div>
+  <form class="client-form" id="client-form">
+    <div class="field">
+      <label for="client-name">Nome</label>
+      <input id="client-name" name="nome" required maxlength="100" autocomplete="name" />
+    </div>
+    <div class="field">
+      <label for="client-plan">Plano</label>
+      <select id="client-plan" name="plano" required>
+        <option value="Básico">Básico</option>
+        <option value="Pro">Pro</option>
+        <option value="Enterprise">Enterprise</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="client-status">Status inicial</label>
+      <select id="client-status" name="status" required>
+        <option value="ativo">Ativo</option>
+        <option value="pendente">Pendente</option>
+        <option value="inadimplente">Inadimplente</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="button-link secondary" id="btn-cancelar-cliente" type="button">Cancelar</button>
+      <button type="submit">Adicionar cliente</button>
+    </div>
+  </form>
+</dialog>
 
 <script>
   const criarStatusPadrao = () => ({ valor: "ativo", atualizadoEm: null });
@@ -166,24 +248,119 @@
 
   function render() {
     const tbody = document.getElementById("tbody");
-    tbody.innerHTML = "";
+    tbody.replaceChildren();
 
     for (const c of clientes) {
       const tr = document.createElement("tr");
-
       const icone = c.status.valor === "inadimplente" ? "⚠ " : "";
-      const options = STATUS.map(s =>
-        `<option value="${s}" ${s === c.status.valor ? "selected" : ""}>${rotulo[s]}</option>`
-      ).join("");
 
-      tr.innerHTML = `
-        <td><span class="nome">${c.nome}</span></td>
-        <td>${c.plano}</td>
-        <td><span class="badge ${c.status.valor}">${icone}${rotulo[c.status.valor]}</span></td>
-        <td><select data-id="${c.id}">${options}</select></td>
-      `;
+      const nomeCelula = document.createElement("td");
+      const nome = document.createElement("span");
+      nome.className = "nome";
+      nome.textContent = c.nome;
+      nomeCelula.appendChild(nome);
+
+      const planoCelula = document.createElement("td");
+      planoCelula.textContent = c.plano;
+
+      const statusCelula = document.createElement("td");
+      const badge = document.createElement("span");
+      badge.className = `badge ${c.status.valor}`;
+      badge.textContent = `${icone}${rotulo[c.status.valor]}`;
+      statusCelula.appendChild(badge);
+
+      const alterarCelula = document.createElement("td");
+      const select = document.createElement("select");
+      select.dataset.id = c.id;
+      select.setAttribute("aria-label", `Alterar status de ${c.nome}`);
+      for (const status of STATUS) {
+        const option = document.createElement("option");
+        option.value = status;
+        option.textContent = rotulo[status];
+        option.selected = status === c.status.valor;
+        select.appendChild(option);
+      }
+      alterarCelula.appendChild(select);
+
+      const acoesCelula = document.createElement("td");
+      const excluir = document.createElement("button");
+      excluir.className = "delete-button";
+      excluir.type = "button";
+      excluir.dataset.action = "delete";
+      excluir.dataset.id = c.id;
+      excluir.textContent = "Excluir";
+      excluir.setAttribute("aria-label", `Excluir ${c.nome}`);
+      acoesCelula.appendChild(excluir);
+
+      tr.append(nomeCelula, planoCelula, statusCelula, alterarCelula, acoesCelula);
       tbody.appendChild(tr);
     }
+
+    if (clientes.length === 0) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 5;
+      td.textContent = "Nenhum cliente cadastrado.";
+      td.style.textAlign = "center";
+      td.style.color = "var(--muted)";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+  }
+
+  function adicionarCliente({ nome, plano, status }) {
+    const cliente = {
+      id: Date.now(),
+      nome: nome.trim(),
+      plano,
+      status: { valor: status, atualizadoEm: null },
+    };
+    clientes.push(cliente);
+    render();
+    registrarLog(`${cliente.nome} foi adicionado ao plano ${cliente.plano}.`);
+    return cliente;
+  }
+
+  function excluirCliente(id) {
+    const cliente = clientes.find(c => c.id === id);
+    if (!cliente || !window.confirm(`Excluir ${cliente.nome}?`)) return false;
+
+    clientes = clientes.filter(c => c.id !== id);
+    render();
+    registrarLog(`${cliente.nome} foi excluído.`, true);
+    return true;
+  }
+
+  function abrirFormularioCliente() {
+    const form = document.getElementById("client-form");
+    form.reset();
+    document.getElementById("client-dialog").showModal();
+    form.elements.nome.focus();
+  }
+
+  function fecharFormularioCliente() {
+    const dialog = document.getElementById("client-dialog");
+    if (dialog.open) dialog.close();
+  }
+
+  function enviarFormularioCliente(evento) {
+    evento.preventDefault();
+    const form = evento.currentTarget;
+    const dados = new FormData(form);
+    const nome = dados.get("nome").trim();
+    if (!nome) {
+      form.elements.nome.setCustomValidity("Informe um nome válido.");
+      form.elements.nome.reportValidity();
+      return;
+    }
+
+    form.elements.nome.setCustomValidity("");
+    adicionarCliente({
+      nome,
+      plano: dados.get("plano"),
+      status: dados.get("status"),
+    });
+    fecharFormularioCliente();
   }
 
   function mudarStatus(id, novoValor) {
@@ -249,6 +426,17 @@
     if (e.target.matches("select[data-id]")) {
       mudarStatus(Number(e.target.dataset.id), e.target.value);
     }
+  });
+  document.getElementById("tbody").addEventListener("click", (e) => {
+    const botao = e.target.closest("[data-action='delete']");
+    if (botao) excluirCliente(Number(botao.dataset.id));
+  });
+  document.getElementById("btn-novo-cliente").addEventListener("click", abrirFormularioCliente);
+  document.getElementById("btn-fechar-cliente").addEventListener("click", fecharFormularioCliente);
+  document.getElementById("btn-cancelar-cliente").addEventListener("click", fecharFormularioCliente);
+  document.getElementById("client-form").addEventListener("submit", enviarFormularioCliente);
+  document.getElementById("client-dialog").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) fecharFormularioCliente();
   });
   document.getElementById("btn-importar").addEventListener("click", importarClientes);
 
