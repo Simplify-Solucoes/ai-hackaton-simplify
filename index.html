@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mini-CRM Lite — Starter</title>
+<title>Gustavo Gabriel Simas</title>
 
 <style>
   :root {
@@ -32,10 +32,56 @@
     color: var(--ink);
     background: var(--bg);
     line-height: 1.5;
-    padding: 2rem 1rem;
   }
 
-  .wrap { max-width: 760px; margin: 0 auto; }
+  .app-shell { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 230px; flex: 0 0 230px; background: #171b2b; color: #aab0c4;
+    padding: 1.25rem 1rem; display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .sidebar .marca {
+    display: flex; align-items: center; gap: .6rem; color: #fff; font-weight: 700;
+    font-size: 1.02rem; padding: .5rem .6rem 1.5rem;
+  }
+  .sidebar .marca .logo {
+    width: 1.7rem; height: 1.7rem; border-radius: 7px; background: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff;
+  }
+  .sidebar nav { display: flex; flex-direction: column; gap: .2rem; flex: 1; }
+  .sidebar nav a {
+    display: flex; align-items: center; gap: .7rem; padding: .65rem .75rem; border-radius: 8px;
+    color: #aab0c4; text-decoration: none; font-size: .88rem; font-weight: 550;
+    transition: background .15s ease, color .15s ease;
+  }
+  .sidebar nav a:hover { background: #232840; color: #fff; }
+  .sidebar nav a.ativo { background: rgba(13,148,136,.22); color: #fff; box-shadow: inset 3px 0 0 var(--accent); }
+  .sidebar .icone { font-size: 1.05rem; width: 1.3rem; text-align: center; }
+  .sidebar .rodape { border-top: 1px solid #232840; padding-top: .75rem; margin-top: .5rem; }
+  .sidebar .usuario { font-size: .78rem; color: #6f7690; padding: .3rem .75rem .6rem; }
+  .sidebar .sair-sidebar {
+    width: 100%; display: flex; align-items: center; gap: .7rem; padding: .6rem .75rem;
+    border-radius: 8px; border: none; background: none; color: #aab0c4; font: inherit;
+    font-size: .88rem; cursor: pointer; text-align: left;
+  }
+  .sidebar .sair-sidebar:hover { background: #232840; color: #fff; }
+
+  .content { flex: 1; min-width: 0; padding: 2rem 2.25rem; }
+  .wrap { max-width: 760px; }
+
+  @media (max-width: 760px) {
+    .app-shell { flex-direction: column; }
+    .sidebar {
+      width: 100%; flex: none; height: auto; position: static;
+      flex-direction: row; align-items: center; gap: .5rem; overflow-x: auto;
+    }
+    .sidebar .marca { padding: .25rem .5rem; }
+    .sidebar nav { flex-direction: row; flex: none; }
+    .sidebar .rodape { border-top: none; margin: 0 0 0 auto; padding: 0; display: flex; align-items: center; gap: .5rem; }
+    .sidebar .usuario { display: none; }
+    .content { padding: 1.5rem 1rem; }
+  }
 
   header { margin-bottom: 1.5rem; }
   header h1 {
@@ -47,14 +93,34 @@
     display: flex; gap: .6rem; align-items: center;
     margin-bottom: 1rem; flex-wrap: wrap;
   }
-  button {
+  button, .btn {
     font: inherit; font-weight: 550; cursor: pointer;
     border: 1px solid var(--accent); background: var(--accent); color: #fff;
     padding: .5rem .9rem; border-radius: var(--radius);
     transition: background .15s ease;
+    display: inline-block; text-decoration: none;
   }
-  button:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
-  button:focus-visible { outline: 3px solid #99f6e4; outline-offset: 2px; }
+  button:hover, .btn:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
+  button:focus-visible, .btn:focus-visible { outline: 3px solid #99f6e4; outline-offset: 2px; }
+
+  button.secundario, .btn.secundario {
+    background: #fff; color: var(--accent-ink); border-color: var(--line);
+  }
+  button.secundario:hover, .btn.secundario:hover {
+    background: #fafbfc; border-color: var(--accent); color: var(--accent-ink);
+  }
+
+  button.perigo {
+    background: #fff; color: var(--inad-fg); border: 1px solid var(--inad-fg);
+    padding: .3rem .6rem; font-size: .8rem;
+  }
+  button.perigo:hover { background: var(--inad-bg); border-color: var(--inad-fg); }
+
+  .form-cliente input[type="text"] {
+    font: inherit; padding: .5rem .7rem; border-radius: var(--radius);
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  .form-cliente input[type="text"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
   .card {
     background: var(--surface); border: 1px solid var(--line);
@@ -105,39 +171,98 @@
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Mini-CRM Lite</h1>
-    <p>Gestão de clientes em memória — starter do hackathon.</p>
-  </header>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="marca"><span class="logo">M</span> Mini-CRM</div>
+    <nav>
+      <a href="dashboard.html"><span class="icone">📊</span> Dashboard</a>
+      <a href="index.html" class="ativo"><span class="icone">👥</span> Clientes</a>
+      <a href="produtos.html"><span class="icone">🛒</span> Produtos</a>
+    </nav>
+    <div class="rodape">
+      <div class="usuario" id="usuario-logado"></div>
+      <button class="sair-sidebar" id="btn-sair"><span class="icone">↩</span> Sair</button>
+    </div>
+  </aside>
 
-  <div class="bar">
-    <button id="btn-importar">Importar clientes</button>
-  </div>
+  <main class="content">
+    <div class="wrap">
+      <header>
+        <h1>Mini-CRM Lite</h1>
+        <p>Gestão de clientes em memória — starter do hackathon.</p>
+      </header>
 
-  <div class="card">
-    <table>
-      <thead>
-        <tr><th>Nome</th><th>Plano</th><th>Status</th><th>Alterar</th></tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
+      <div class="bar">
+        <button id="btn-importar">Importar clientes</button>
+        <!-- <button id="btn-exportar" class="secundario">Exportar JSON</button>
+        <label class="btn secundario" for="input-importar-json">Importar JSON</label> -->
+        <input id="input-importar-json" type="file" accept="application/json" hidden />
+      </div>
 
-  <div class="log">
-    <h2>Log de ações</h2>
-    <div id="log"></div>
-  </div>
+      <div class="bar form-cliente">
+        <input id="novo-nome" type="text" placeholder="Nome do cliente" />
+        <select id="novo-plano">
+          <option value="Básico">Básico</option>
+          <option value="Pro">Pro</option>
+          <option value="Enterprise">Enterprise</option>
+        </select>
+        <button id="btn-adicionar">+ Adicionar cliente</button>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Nome</th><th>Plano</th><th>Status</th><th>Alterar</th><th>Ações</th></tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="log">
+        <h2>Log de ações</h2>
+        <div id="log"></div>
+      </div>
+    </div>
+  </main>
 </div>
 
 <script>
-  const statusPadrao = { valor: "ativo", atualizadoEm: null };
+  const CHAVE_TOKEN = "miniCrmToken";
 
-  let clientes = [
-    { id: 1, nome: "Ana Souza",   plano: "Pro",        status: statusPadrao },
-    { id: 2, nome: "Bruno Lima",  plano: "Básico",     status: statusPadrao },
-    { id: 3, nome: "Carla Dias",  plano: "Enterprise", status: statusPadrao },
-  ];
+  if (!sessionStorage.getItem(CHAVE_TOKEN)) {
+    window.location.replace("login.html");
+  }
+
+  function statusPadrao() {
+    return { valor: "ativo", atualizadoEm: null };
+  }
+
+  const CHAVE_ARMAZENAMENTO = "miniCrmClientes";
+
+  function clientesPadrao() {
+    return [
+      { id: 1, nome: "Ana Souza",   plano: "Pro",        status: statusPadrao() },
+      { id: 2, nome: "Bruno Lima",  plano: "Básico",     status: statusPadrao() },
+      { id: 3, nome: "Carla Dias",  plano: "Enterprise", status: statusPadrao() },
+    ];
+  }
+
+  function carregarClientes() {
+    const salvo = localStorage.getItem(CHAVE_ARMAZENAMENTO);
+    if (!salvo) return clientesPadrao();
+    try {
+      const dados = JSON.parse(salvo);
+      return Array.isArray(dados) && dados.length ? dados : clientesPadrao();
+    } catch {
+      return clientesPadrao();
+    }
+  }
+
+  function salvarClientes() {
+    localStorage.setItem(CHAVE_ARMAZENAMENTO, JSON.stringify(clientes));
+  }
+
+  let clientes = carregarClientes();
 
   const STATUS = ["ativo", "pendente", "inadimplente"];
   const rotulo = { ativo: "Ativo", pendente: "Pendente", inadimplente: "Inadimplente" };
@@ -159,6 +284,7 @@
         <td>${c.plano}</td>
         <td><span class="badge ${c.status.valor}">${icone}${rotulo[c.status.valor]}</span></td>
         <td><select data-id="${c.id}">${options}</select></td>
+        <td><button class="perigo" data-excluir-id="${c.id}">Excluir</button></td>
       `;
       tbody.appendChild(tr);
     }
@@ -174,7 +300,60 @@
     } else {
       registrarLog(`${cliente.nome} → ${rotulo[novoValor]} (${cliente.status.atualizadoEm})`);
     }
+    salvarClientes();
     render();
+  }
+
+  function adicionarCliente(nome, plano) {
+    nome = nome.trim();
+    plano = plano.trim();
+    if (!nome) {
+      alert("Informe o nome do cliente.");
+      return;
+    }
+    const novoId = clientes.reduce((max, c) => Math.max(max, c.id), 0) + 1;
+    clientes.push({ id: novoId, nome, plano: plano || "Básico", status: statusPadrao() });
+    registrarLog(`Cliente "${nome}" adicionado (${plano || "Básico"})`);
+    salvarClientes();
+    render();
+  }
+
+  function excluirCliente(id) {
+    const cliente = clientes.find(c => c.id === id);
+    if (!cliente) return;
+    if (!confirm(`Excluir o cliente "${cliente.nome}"?`)) return;
+    clientes = clientes.filter(c => c.id !== id);
+    registrarLog(`Cliente "${cliente.nome}" excluído`);
+    salvarClientes();
+    render();
+  }
+
+  function exportarClientesJSON() {
+    const blob = new Blob([JSON.stringify(clientes, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "clientes.json";
+    a.click();
+    URL.revokeObjectURL(url);
+    registrarLog("Clientes exportados para clientes.json");
+  }
+
+  function importarClientesJSON(arquivo) {
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      try {
+        const dados = JSON.parse(leitor.result);
+        if (!Array.isArray(dados)) throw new Error("formato inválido");
+        clientes = dados;
+        salvarClientes();
+        render();
+        registrarLog(`Clientes importados de ${arquivo.name} (${dados.length} registro(s))`);
+      } catch {
+        alert("Arquivo JSON inválido.");
+      }
+    };
+    leitor.readAsText(arquivo);
   }
 
   function registrarLog(texto, alerta = false) {
@@ -197,7 +376,40 @@
       mudarStatus(Number(e.target.dataset.id), e.target.value);
     }
   });
+  document.getElementById("tbody").addEventListener("click", (e) => {
+    if (e.target.matches("[data-excluir-id]")) {
+      excluirCliente(Number(e.target.dataset.excluirId));
+    }
+  });
   document.getElementById("btn-importar").addEventListener("click", importarClientes);
+
+  document.getElementById("btn-adicionar").addEventListener("click", () => {
+    const nomeInput = document.getElementById("novo-nome");
+    const planoInput = document.getElementById("novo-plano");
+    adicionarCliente(nomeInput.value, planoInput.value);
+    nomeInput.value = "";
+    planoInput.value = "";
+    nomeInput.focus();
+  });
+
+  document.getElementById("btn-exportar")?.addEventListener("click", exportarClientesJSON);
+
+  document.getElementById("input-importar-json").addEventListener("change", (e) => {
+    const arquivo = e.target.files[0];
+    if (arquivo) importarClientesJSON(arquivo);
+    e.target.value = "";
+  });
+
+  document.getElementById("btn-sair").addEventListener("click", () => {
+    sessionStorage.removeItem(CHAVE_TOKEN);
+    sessionStorage.removeItem("miniCrmUsuario");
+    window.location.replace("login.html");
+  });
+
+  const usuario = sessionStorage.getItem("miniCrmUsuario");
+  if (usuario) {
+    document.getElementById("usuario-logado").textContent = `Logado como ${usuario}`;
+  }
 
   document.getElementById("log").innerHTML = '<span class="vazio">Nenhuma ação ainda.</span>';
   render();

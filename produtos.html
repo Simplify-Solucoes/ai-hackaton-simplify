@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Catálogo de Produtos — Mini-CRM Lite</title>
+
+<style>
+  :root {
+    --bg:        #f4f6f8;
+    --surface:   #ffffff;
+    --ink:       #1a1d24;
+    --muted:     #6b7280;
+    --line:      #e3e7ec;
+    --accent:    #0d9488;
+    --accent-ink:#0a5f59;
+
+    --radius: 10px;
+    --font-ui:   system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-ui);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+  }
+
+  .app-shell { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 230px; flex: 0 0 230px; background: #171b2b; color: #aab0c4;
+    padding: 1.25rem 1rem; display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .sidebar .marca {
+    display: flex; align-items: center; gap: .6rem; color: #fff; font-weight: 700;
+    font-size: 1.02rem; padding: .5rem .6rem 1.5rem;
+  }
+  .sidebar .marca .logo {
+    width: 1.7rem; height: 1.7rem; border-radius: 7px; background: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff;
+  }
+  .sidebar nav { display: flex; flex-direction: column; gap: .2rem; flex: 1; }
+  .sidebar nav a {
+    display: flex; align-items: center; gap: .7rem; padding: .65rem .75rem; border-radius: 8px;
+    color: #aab0c4; text-decoration: none; font-size: .88rem; font-weight: 550;
+    transition: background .15s ease, color .15s ease;
+  }
+  .sidebar nav a:hover { background: #232840; color: #fff; }
+  .sidebar nav a.ativo { background: rgba(13,148,136,.22); color: #fff; box-shadow: inset 3px 0 0 var(--accent); }
+  .sidebar .icone { font-size: 1.05rem; width: 1.3rem; text-align: center; }
+  .sidebar .rodape { border-top: 1px solid #232840; padding-top: .75rem; margin-top: .5rem; }
+  .sidebar .usuario { font-size: .78rem; color: #6f7690; padding: .3rem .75rem .6rem; }
+  .sidebar .sair-sidebar {
+    width: 100%; display: flex; align-items: center; gap: .7rem; padding: .6rem .75rem;
+    border-radius: 8px; border: none; background: none; color: #aab0c4; font: inherit;
+    font-size: .88rem; cursor: pointer; text-align: left;
+  }
+  .sidebar .sair-sidebar:hover { background: #232840; color: #fff; }
+
+  .content { flex: 1; min-width: 0; padding: 2rem 2.25rem; }
+  .wrap { max-width: 1080px; }
+
+  @media (max-width: 760px) {
+    .app-shell { flex-direction: column; }
+    .sidebar {
+      width: 100%; flex: none; height: auto; position: static;
+      flex-direction: row; align-items: center; gap: .5rem; overflow-x: auto;
+    }
+    .sidebar .marca { padding: .25rem .5rem; }
+    .sidebar nav { flex-direction: row; flex: none; }
+    .sidebar .rodape { border-top: none; margin: 0 0 0 auto; padding: 0; display: flex; align-items: center; gap: .5rem; }
+    .sidebar .usuario { display: none; }
+    .content { padding: 1.5rem 1rem; }
+  }
+
+  header { margin-bottom: 1.5rem; }
+  header .topo {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-size: 1.35rem; font-weight: 650; letter-spacing: -0.01em; margin: 0;
+  }
+  header p { margin: .25rem 0 0; color: var(--muted); font-size: .9rem; }
+
+  .bar {
+    display: flex; gap: .6rem; align-items: center;
+    margin-bottom: 1.25rem; flex-wrap: wrap;
+  }
+  .bar input[type="search"], .bar select {
+    font: inherit; padding: .55rem .8rem; border-radius: var(--radius);
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  .bar input[type="search"] { flex: 1 1 220px; min-width: 180px; }
+  .bar select { flex: 0 0 auto; }
+  .bar input:focus-visible, .bar select:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px;
+  }
+  .bar .contagem { color: var(--muted); font-size: .85rem; white-space: nowrap; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 1rem;
+  }
+
+  .produto {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .produto .imagem {
+    height: 160px; display: flex; align-items: center; justify-content: center;
+    background: #fff; padding: 1rem; border-bottom: 1px solid var(--line);
+  }
+  .produto .imagem img {
+    max-width: 100%; max-height: 100%; object-fit: contain;
+  }
+  .produto .corpo {
+    padding: .85rem 1rem 1rem; display: flex; flex-direction: column; gap: .4rem; flex: 1;
+  }
+  .produto .categoria {
+    display: inline-block; align-self: flex-start;
+    padding: .15rem .55rem; border-radius: 999px;
+    font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+    background: #e7f6ec; color: #157347;
+  }
+  .produto .titulo {
+    font-size: .92rem; font-weight: 600; margin: 0;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .produto .preco {
+    margin-top: auto; font-size: 1.05rem; font-weight: 700; color: var(--accent-ink);
+  }
+
+  .estado {
+    padding: 2.5rem 1rem; text-align: center; color: var(--muted); font-size: .92rem;
+  }
+  .estado.erro { color: #c02626; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="marca"><span class="logo">M</span> Mini-CRM</div>
+    <nav>
+      <a href="dashboard.html"><span class="icone">📊</span> Dashboard</a>
+      <a href="index.html"><span class="icone">👥</span> Clientes</a>
+      <a href="produtos.html" class="ativo"><span class="icone">🛒</span> Produtos</a>
+    </nav>
+    <div class="rodape">
+      <div class="usuario" id="usuario-logado"></div>
+      <button class="sair-sidebar" id="btn-sair"><span class="icone">↩</span> Sair</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="wrap">
+      <header>
+        <h1>Catálogo de Produtos</h1>
+        <p>Dados carregados em tempo real de fakestoreapi.com/products.</p>
+      </header>
+
+      <div class="bar">
+        <input id="busca" type="search" placeholder="Buscar por nome…" aria-label="Buscar produto por nome" />
+        <select id="categoria" aria-label="Filtrar por categoria">
+          <option value="">Todas as categorias</option>
+        </select>
+        <span class="contagem" id="contagem"></span>
+      </div>
+
+      <div id="conteudo">
+        <div class="estado" id="estado">Carregando produtos…</div>
+        <div class="grid" id="grid" hidden></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  if (!sessionStorage.getItem("miniCrmToken")) {
+    window.location.replace("login.html");
+  }
+
+  let produtos = [];
+
+  async function carregarProdutos() {
+    const estado = document.getElementById("estado");
+    try {
+      const resp = await fetch("https://fakestoreapi.com/products");
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      produtos = await resp.json();
+      popularCategorias(produtos);
+      renderGrid(produtos);
+      estado.hidden = true;
+    } catch (erro) {
+      estado.textContent = "Não foi possível carregar os produtos. Tente novamente mais tarde.";
+      estado.classList.add("erro");
+      estado.hidden = false;
+    }
+  }
+
+  function popularCategorias(lista) {
+    const select = document.getElementById("categoria");
+    const categorias = [...new Set(lista.map(p => p.category))].sort();
+    for (const cat of categorias) {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+      select.appendChild(opt);
+    }
+  }
+
+  function formatarPreco(valor) {
+    return valor.toLocaleString("pt-BR", { style: "currency", currency: "USD" });
+  }
+
+  function renderGrid(lista) {
+    const grid = document.getElementById("grid");
+    const estado = document.getElementById("estado");
+    const contagem = document.getElementById("contagem");
+
+    contagem.textContent = `${lista.length} produto${lista.length === 1 ? "" : "s"}`;
+
+    if (lista.length === 0) {
+      grid.hidden = true;
+      estado.hidden = false;
+      estado.classList.remove("erro");
+      estado.textContent = "Nenhum produto encontrado com esse filtro.";
+      return;
+    }
+
+    estado.hidden = true;
+    grid.hidden = false;
+    grid.innerHTML = lista.map(p => `
+      <div class="produto">
+        <div class="imagem"><img src="${p.image}" alt="${p.title}" loading="lazy" /></div>
+        <div class="corpo">
+          <span class="categoria">${p.category}</span>
+          <p class="titulo" title="${p.title}">${p.title}</p>
+          <span class="preco">${formatarPreco(p.price)}</span>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function aplicarFiltros() {
+    const termo = document.getElementById("busca").value.trim().toLowerCase();
+    const categoria = document.getElementById("categoria").value;
+
+    const filtrados = produtos.filter(p => {
+      const bateBusca = !termo || p.title.toLowerCase().includes(termo);
+      const bateCategoria = !categoria || p.category === categoria;
+      return bateBusca && bateCategoria;
+    });
+
+    renderGrid(filtrados);
+  }
+
+  document.getElementById("busca").addEventListener("input", aplicarFiltros);
+  document.getElementById("categoria").addEventListener("change", aplicarFiltros);
+
+  document.getElementById("btn-sair").addEventListener("click", () => {
+    sessionStorage.removeItem("miniCrmToken");
+    sessionStorage.removeItem("miniCrmUsuario");
+    window.location.replace("login.html");
+  });
+
+  const usuario = sessionStorage.getItem("miniCrmUsuario");
+  if (usuario) {
+    document.getElementById("usuario-logado").textContent = `Logado como ${usuario}`;
+  }
+
+  carregarProdutos();
+</script>
+</body>
+</html>
