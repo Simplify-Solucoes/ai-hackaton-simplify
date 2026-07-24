@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mini-CRM Lite — Starter</title>
+<title>PrestesMarket— Starter</title>
 
 <style>
   :root {
@@ -30,12 +30,12 @@
     margin: 0;
     font-family: var(--font-ui);
     color: var(--ink);
-    background: var(--bg);
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
     line-height: 1.5;
     padding: 2rem 1rem;
   }
 
-  .wrap { max-width: 760px; margin: 0 auto; }
+  .wrap { max-width: 1100px; margin: 0 auto; }
 
   header { margin-bottom: 1.5rem; }
   header h1 {
@@ -46,6 +46,15 @@
   .bar {
     display: flex; gap: .6rem; align-items: center;
     margin-bottom: 1rem; flex-wrap: wrap;
+  }
+  .hero {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;
+  }
+  .hero .chip {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .4rem .7rem; border-radius: 999px; background: #ecfeff;
+    color: var(--accent-ink); font-size: .8rem; font-weight: 700;
   }
   button {
     font: inherit; font-weight: 550; cursor: pointer;
@@ -58,7 +67,8 @@
 
   .card {
     background: var(--surface); border: 1px solid var(--line);
-    border-radius: var(--radius); overflow: hidden;
+    border-radius: 18px; overflow: hidden;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
   }
 
   table { width: 100%; border-collapse: collapse; }
@@ -82,62 +92,111 @@
   .badge.pendente     { background: var(--pend-bg);  color: var(--pend-fg); }
   .badge.inadimplente { background: var(--inad-bg);  color: var(--inad-fg); }
 
+  .actions { display: flex; gap: .4rem; align-items: center; }
+  .btn-delete {
+    font-size: .8rem; padding: .35rem .65rem; border-color: #dc2626; background: #dc2626;
+  }
+  .btn-delete:hover { background: #b91c1c; border-color: #b91c1c; }
+
+  .form-add {
+    display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: .6rem;
+    padding: 1rem; border-bottom: 1px solid var(--line);
+  }
+  .form-add input, .form-add select {
+    width: 100%;
+    padding: .6rem .7rem; border: 1px solid var(--line); border-radius: 10px;
+  }
+  .form-add button {
+    padding: .6rem .8rem;
+  }
+
+  .catalogo {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: .9rem; padding: 1rem;
+  }
+  .paginacao {
+    display: flex; justify-content: center; gap: .5rem; padding: 0 1rem 1rem;
+  }
+  .paginacao button {
+    padding: .4rem .7rem; min-width: 2.4rem;
+  }
+  .paginacao button.ativo {
+    background: var(--accent-ink);
+    border-color: var(--accent-ink);
+  }
+  .produto {
+    border: 1px solid var(--line); border-radius: var(--radius); padding: .8rem;
+    background: #fff; display: flex; flex-direction: column; gap: .55rem;
+  }
+  .produto img {
+    width: 100%; height: 140px; object-fit: contain; border-radius: 8px;
+    background: #fafafa; padding: .25rem;
+  }
+  .produto .titulo { font-weight: 600; font-size: .9rem; }
+  .produto .meta { color: var(--muted); font-size: .78rem; }
+  .produto .preco { color: var(--accent-ink); font-weight: 700; }
+
   select {
     font: inherit; padding: .35rem .5rem; border-radius: 8px;
     border: 1px solid var(--line); background: #fff; color: var(--ink);
   }
   select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-  .log {
-    margin-top: 1.25rem; background: #12151c; color: #cfd6e0;
-    border-radius: var(--radius); padding: .9rem 1rem;
-    font-family: var(--font-mono); font-size: .82rem; min-height: 3rem;
-  }
-  .log h2 {
-    font-family: var(--font-ui); font-size: .72rem; text-transform: uppercase;
-    letter-spacing: .06em; color: #8b94a3; margin: 0 0 .5rem; font-weight: 600;
-  }
-  .log .linha { white-space: pre-wrap; }
-  .log .linha.alerta { color: #ff8a8a; }
-  .log .vazio { color: #5b6472; }
-
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>Mini-CRM Lite</h1>
-    <p>Gestão de clientes em memória — starter do hackathon.</p>
+  <header class="hero">
+    <div>
+      <div class="chip">● Dashboard v1</div>
+      <h1>Jhonatan Prestes</h1>
+      <p>Gestão de clientes em memória — visão clara e interativa.</p>
+    </div>
+    <div class="bar">
+      <button id="btn-importar">Carregar catálogo</button>
+    </div>
   </header>
 
-  <div class="bar">
-    <button id="btn-importar">Importar clientes</button>
-  </div>
-
   <div class="card">
+    <form id="form-add-client" class="form-add">
+      <input id="nome-cliente" type="text" placeholder="Nome do cliente" required />
+      <input id="plano-cliente" type="text" placeholder="Plano" required />
+      <select id="status-cliente">
+        <option value="ativo">Ativo</option>
+        <option value="pendente">Pendente</option>
+        <option value="inadimplente">Inadimplente</option>
+      </select>
+      <button type="submit">Adicionar</button>
+    </form>
+
     <table>
       <thead>
-        <tr><th>Nome</th><th>Plano</th><th>Status</th><th>Alterar</th></tr>
+        <tr><th>Nome</th><th>Plano</th><th>Status</th><th>Alterar</th><th>Ações</th></tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
 
-  <div class="log">
-    <h2>Log de ações</h2>
-    <div id="log"></div>
+  <div class="card" style="margin-top: 1rem;">
+    <div id="catalogo" class="catalogo"></div>
+    <div id="paginacao" class="paginacao"></div>
   </div>
+
 </div>
 
 <script>
-  const statusPadrao = { valor: "ativo", atualizadoEm: null };
+  const criarStatusPadrao = () => ({ valor: "ativo", atualizadoEm: null });
 
   let clientes = [
-    { id: 1, nome: "Ana Souza",   plano: "Pro",        status: statusPadrao },
-    { id: 2, nome: "Bruno Lima",  plano: "Básico",     status: statusPadrao },
-    { id: 3, nome: "Carla Dias",  plano: "Enterprise", status: statusPadrao },
+    { id: 1, nome: "Ana Souza",   plano: "Pro",        status: criarStatusPadrao() },
+    { id: 2, nome: "Bruno Lima",  plano: "Básico",     status: criarStatusPadrao() },
+    { id: 3, nome: "Carla Dias",  plano: "Enterprise", status: criarStatusPadrao() },
   ];
+  let catalogoProdutos = [];
+  let paginaAtual = 1;
+  const produtosPorPagina = 6;
+  const maxProdutosCatalogo = 18;
 
   const STATUS = ["ativo", "pendente", "inadimplente"];
   const rotulo = { ativo: "Ativo", pendente: "Pendente", inadimplente: "Inadimplente" };
@@ -159,6 +218,7 @@
         <td>${c.plano}</td>
         <td><span class="badge ${c.status.valor}">${icone}${rotulo[c.status.valor]}</span></td>
         <td><select data-id="${c.id}">${options}</select></td>
+        <td><div class="actions"><button class="btn-delete" data-action="remover" data-id="${c.id}">Excluir</button></div></td>
       `;
       tbody.appendChild(tr);
     }
@@ -168,39 +228,111 @@
     const cliente = clientes.find(c => c.id === id);
     cliente.status.valor = novoValor;
     cliente.status.atualizadoEm = new Date().toLocaleTimeString("pt-BR");
-
-    if (novoValor === "inadimplente") {
-      registrarLog(`⚠ Ação disparada: ${cliente.nome} ficou INADIMPLENTE (${cliente.status.atualizadoEm})`, true);
-    } else {
-      registrarLog(`${cliente.nome} → ${rotulo[novoValor]} (${cliente.status.atualizadoEm})`);
-    }
     render();
   }
 
-  function registrarLog(texto, alerta = false) {
-    const box = document.getElementById("log");
-    const vazio = box.querySelector(".vazio");
-    if (vazio) vazio.remove();
-    const linha = document.createElement("div");
-    linha.className = "linha" + (alerta ? " alerta" : "");
-    linha.textContent = "› " + texto;
-    box.prepend(linha);
+  function renderCatalogo() {
+    const container = document.getElementById("catalogo");
+    if (!catalogoProdutos.length) {
+      container.innerHTML = '<p class="vazio">Nenhum produto carregado ainda.</p>';
+      return;
+    }
+
+    const produtosVisiveis = catalogoProdutos.slice(0, maxProdutosCatalogo);
+    const inicio = (paginaAtual - 1) * produtosPorPagina;
+    const fim = inicio + produtosPorPagina;
+    const produtosPagina = produtosVisiveis.slice(inicio, fim);
+
+    container.innerHTML = produtosPagina.map((produto) => `
+      <article class="produto">
+        <img src="${produto.image}" alt="${produto.title}" />
+        <div class="titulo">${produto.title}</div>
+        <div class="meta">${produto.category}</div>
+        <div class="preco">R$ ${produto.price.toFixed(2)}</div>
+      </article>
+    `).join("");
+
+    const paginacao = document.getElementById("paginacao");
+    const totalPaginas = Math.ceil(Math.min(catalogoProdutos.length, maxProdutosCatalogo) / produtosPorPagina);
+    paginacao.innerHTML = "";
+
+    for (let i = 1; i <= totalPaginas; i += 1) {
+      const botao = document.createElement("button");
+      botao.textContent = i;
+      botao.className = i === paginaAtual ? "ativo" : "";
+      botao.addEventListener("click", () => {
+        paginaAtual = i;
+        renderCatalogo();
+      });
+      paginacao.appendChild(botao);
+    }
   }
 
-  async function importarClientes() {
-    registrarLog("TODO: integrar com https://fakestoreapi.com/users");
-    alert("Integração pendente — este é um dos desafios! Veja o TODO em importarClientes().");
+  async function carregarCatalogoProdutos() {
+    const container = document.getElementById("catalogo");
+    container.innerHTML = '<p class="vazio">Carregando catálogo...</p>';
+
+    try {
+      const resposta = await fetch("https://fakestoreapi.com/products");
+      if (!resposta.ok) {
+        throw new Error(`Falha ao carregar produtos: ${resposta.status}`);
+      }
+
+      catalogoProdutos = await resposta.json();
+      paginaAtual = 1;
+      renderCatalogo();
+    } catch (erro) {
+      container.innerHTML = '<p class="vazio">Não foi possível carregar o catálogo no momento.</p>';
+    }
   }
+
+  document.getElementById("form-add-client").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const nome = document.getElementById("nome-cliente").value.trim();
+    const plano = document.getElementById("plano-cliente").value.trim();
+    const status = document.getElementById("status-cliente").value;
+
+    if (!nome || !plano) return;
+
+    const novoCliente = {
+      id: Date.now(),
+      nome,
+      plano,
+      status: criarStatusPadrao()
+    };
+    novoCliente.status.valor = status;
+
+    clientes.push(novoCliente);
+    render();
+    e.target.reset();
+  });
 
   document.getElementById("tbody").addEventListener("change", (e) => {
     if (e.target.matches("select[data-id]")) {
       mudarStatus(Number(e.target.dataset.id), e.target.value);
     }
   });
-  document.getElementById("btn-importar").addEventListener("click", importarClientes);
 
-  document.getElementById("log").innerHTML = '<span class="vazio">Nenhuma ação ainda.</span>';
+  document.getElementById("tbody").addEventListener("click", (e) => {
+    const botao = e.target.closest("button[data-action='remover']");
+    if (!botao) return;
+
+    const id = Number(botao.dataset.id);
+    const cliente = clientes.find((c) => c.id === id);
+    if (!cliente) return;
+
+    const confirmar = confirm(`Deseja excluir ${cliente.nome} da lista?`);
+    if (!confirmar) return;
+
+    clientes = clientes.filter((c) => c.id !== id);
+    render();
+  });
+
+  document.getElementById("btn-importar").addEventListener("click", carregarCatalogoProdutos);
+
   render();
+  carregarCatalogoProdutos();
 </script>
 </body>
 </html>
