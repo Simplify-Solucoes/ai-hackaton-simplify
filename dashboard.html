@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard — Gustavo Gabriel Simas</title>
+
+<style>
+  :root {
+    --bg:        #f4f6f8;
+    --surface:   #ffffff;
+    --ink:       #1a1d24;
+    --muted:     #6b7280;
+    --line:      #e3e7ec;
+    --accent:    #0d9488;
+    --accent-ink:#0a5f59;
+
+    --ativo-bg:  #e7f6ec;  --ativo-fg:  #157347;
+    --pend-bg:   #fdf1dd;  --pend-fg:   #b45309;
+    --inad-bg:   #fde3e3;  --inad-fg:   #c02626;
+
+    --radius: 10px;
+    --font-ui:   system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-ui);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+  }
+
+  .app-shell { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 230px; flex: 0 0 230px; background: #171b2b; color: #aab0c4;
+    padding: 1.25rem 1rem; display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .sidebar .marca {
+    display: flex; align-items: center; gap: .6rem; color: #fff; font-weight: 700;
+    font-size: 1.02rem; padding: .5rem .6rem 1.5rem;
+  }
+  .sidebar .marca .logo {
+    width: 1.7rem; height: 1.7rem; border-radius: 7px; background: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff;
+  }
+  .sidebar nav { display: flex; flex-direction: column; gap: .2rem; flex: 1; }
+  .sidebar nav a {
+    display: flex; align-items: center; gap: .7rem; padding: .65rem .75rem; border-radius: 8px;
+    color: #aab0c4; text-decoration: none; font-size: .88rem; font-weight: 550;
+    transition: background .15s ease, color .15s ease;
+  }
+  .sidebar nav a:hover { background: #232840; color: #fff; }
+  .sidebar nav a.ativo { background: rgba(13,148,136,.22); color: #fff; box-shadow: inset 3px 0 0 var(--accent); }
+  .sidebar .icone { font-size: 1.05rem; width: 1.3rem; text-align: center; }
+  .sidebar .rodape { border-top: 1px solid #232840; padding-top: .75rem; margin-top: .5rem; }
+  .sidebar .usuario { font-size: .78rem; color: #6f7690; padding: .3rem .75rem .6rem; }
+  .sidebar .sair-sidebar {
+    width: 100%; display: flex; align-items: center; gap: .7rem; padding: .6rem .75rem;
+    border-radius: 8px; border: none; background: none; color: #aab0c4; font: inherit;
+    font-size: .88rem; cursor: pointer; text-align: left;
+  }
+  .sidebar .sair-sidebar:hover { background: #232840; color: #fff; }
+
+  .content { flex: 1; min-width: 0; padding: 2rem 2.25rem; }
+  .wrap { max-width: 980px; }
+
+  @media (max-width: 760px) {
+    .app-shell { flex-direction: column; }
+    .sidebar {
+      width: 100%; flex: none; height: auto; position: static;
+      flex-direction: row; align-items: center; gap: .5rem; overflow-x: auto;
+    }
+    .sidebar .marca { padding: .25rem .5rem; }
+    .sidebar nav { flex-direction: row; flex: none; }
+    .sidebar .rodape { border-top: none; margin: 0 0 0 auto; padding: 0; display: flex; align-items: center; gap: .5rem; }
+    .sidebar .usuario { display: none; }
+    .content { padding: 1.5rem 1rem; }
+  }
+
+  header { margin-bottom: 1.5rem; }
+  header .topo {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 1.35rem; font-weight: 650; letter-spacing: -0.01em; margin: 0; }
+  header p { margin: .25rem 0 0; color: var(--muted); font-size: .9rem; }
+  header a.voltar {
+    font-size: .85rem; color: var(--accent-ink); text-decoration: none; font-weight: 600;
+  }
+  header a.voltar:hover { text-decoration: underline; }
+
+  .cartoes {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: .8rem; margin-bottom: 1.5rem;
+  }
+  .cartao {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 1rem 1.1rem; cursor: pointer; text-align: left; font: inherit; color: inherit;
+    transition: border-color .15s ease, transform .1s ease;
+  }
+  .cartao:hover { border-color: var(--accent); }
+  .cartao.ativo-filtro { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(13,148,136,.18); }
+  .cartao .rotulo {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
+    color: var(--muted); display: flex; align-items: center; gap: .35rem; margin-bottom: .35rem;
+  }
+  .cartao .ponto { width: .55rem; height: .55rem; border-radius: 50%; display: inline-block; }
+  .cartao .valor { font-size: 1.6rem; font-weight: 700; }
+  .cartao .pct { font-size: .78rem; color: var(--muted); margin-left: .3rem; font-weight: 500; }
+
+  .painel {
+    display: grid; grid-template-columns: minmax(220px, 320px) 1fr; gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 720px) { .painel { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 1.1rem 1.2rem;
+  }
+  .card h2 {
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+    font-weight: 700; margin: 0 0 1rem;
+  }
+
+  .donut-area { display: flex; align-items: center; gap: 1.4rem; flex-wrap: wrap; justify-content: center; }
+  .donut {
+    width: 148px; height: 148px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .donut .furo {
+    width: 78px; height: 78px; border-radius: 50%; background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.15rem; font-weight: 700;
+  }
+  .legenda { display: flex; flex-direction: column; gap: .5rem; }
+  .legenda button {
+    font: inherit; display: flex; align-items: center; gap: .5rem;
+    background: none; border: none; cursor: pointer; padding: .25rem .35rem;
+    border-radius: 6px; font-size: .85rem; color: var(--ink); text-align: left;
+  }
+  .legenda button:hover { background: #fafbfc; }
+  .legenda button.ativo-filtro { background: #eef8f7; font-weight: 650; }
+  .legenda .ponto { width: .6rem; height: .6rem; border-radius: 50%; flex: 0 0 auto; }
+  .legenda .qtd { color: var(--muted); margin-left: auto; padding-left: .5rem; }
+
+  .barras { display: flex; flex-direction: column; gap: .65rem; }
+  .barra-linha { display: grid; grid-template-columns: 90px 1fr 44px; align-items: center; gap: .6rem; }
+  .barra-linha .nome-plano { font-size: .85rem; font-weight: 550; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .barra-trilho { background: #eef1f4; border-radius: 999px; height: .55rem; overflow: hidden; }
+  .barra-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .25s ease; }
+  .barra-linha .qtd-plano { font-size: .82rem; color: var(--muted); text-align: right; }
+
+  .bar {
+    display: flex; gap: .6rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;
+  }
+  .bar input[type="search"], .bar select {
+    font: inherit; padding: .5rem .75rem; border-radius: var(--radius);
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  .bar input[type="search"] { flex: 1 1 200px; }
+  button.limpar {
+    font: inherit; font-weight: 550; cursor: pointer; border: 1px solid var(--line);
+    background: #fff; color: var(--accent-ink); padding: .5rem .8rem; border-radius: var(--radius);
+  }
+  button.limpar:hover { border-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td {
+    text-align: left; padding: .7rem .9rem; border-bottom: 1px solid var(--line);
+    font-size: .9rem; vertical-align: middle;
+  }
+  th {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); font-weight: 600; background: #fafbfc;
+  }
+  tr:last-child td { border-bottom: none; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: .2rem .6rem; border-radius: 999px; font-size: .78rem; font-weight: 600;
+  }
+  .badge.ativo        { background: var(--ativo-bg); color: var(--ativo-fg); }
+  .badge.pendente     { background: var(--pend-bg);  color: var(--pend-fg); }
+  .badge.inadimplente { background: var(--inad-bg);  color: var(--inad-fg); }
+
+  .estado-vazio { padding: 2rem 1rem; text-align: center; color: var(--muted); font-size: .9rem; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="marca"><span class="logo">M</span> Mini-CRM</div>
+    <nav>
+      <a href="dashboard.html" class="ativo"><span class="icone">📊</span> Dashboard</a>
+      <a href="index.html"><span class="icone">👥</span> Clientes</a>
+      <a href="produtos.html"><span class="icone">🛒</span> Produtos</a>
+    </nav>
+    <div class="rodape">
+      <div class="usuario" id="usuario-logado"></div>
+      <button class="sair-sidebar" id="btn-sair"><span class="icone">↩</span> Sair</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="wrap">
+      <header>
+        <h1>Dashboard</h1>
+        <p>Visão geral e filtros interativos sobre a carteira de clientes.</p>
+      </header>
+
+  <div class="cartoes" id="cartoes"></div>
+
+  <div class="painel">
+    <div class="card">
+      <h2>Distribuição por status</h2>
+      <div class="donut-area">
+        <div class="donut" id="donut"><div class="furo" id="donut-total">0</div></div>
+        <div class="legenda" id="legenda"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Clientes por plano</h2>
+      <div class="barras" id="barras"></div>
+    </div>
+  </div>
+
+  <div class="bar">
+    <input id="busca" type="search" placeholder="Buscar cliente por nome…" aria-label="Buscar cliente por nome" />
+    <select id="filtro-plano" aria-label="Filtrar por plano">
+      <option value="">Todos os planos</option>
+    </select>
+    <button class="limpar" id="btn-limpar">Limpar filtros</button>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table>
+      <thead>
+        <tr><th>Nome</th><th>Plano</th><th>Status</th><th>Atualizado em</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="estado-vazio" id="estado-vazio" hidden>Nenhum cliente encontrado com os filtros atuais.</div>
+  </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  if (!sessionStorage.getItem("miniCrmToken")) {
+    window.location.replace("login.html");
+  }
+
+  const CHAVE_ARMAZENAMENTO = "miniCrmClientes";
+  const STATUS = ["ativo", "pendente", "inadimplente"];
+  const ROTULO = { ativo: "Ativo", pendente: "Pendente", inadimplente: "Inadimplente" };
+  const COR = { ativo: "#157347", pendente: "#b45309", inadimplente: "#c02626" };
+
+  let clientes = [];
+  let filtroStatus = null;
+  let filtroPlano = "";
+  let termoBusca = "";
+
+  function carregarClientes() {
+    const salvo = localStorage.getItem(CHAVE_ARMAZENAMENTO);
+    if (!salvo) return [];
+    try {
+      const dados = JSON.parse(salvo);
+      return Array.isArray(dados) ? dados : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function contarPorStatus(lista) {
+    const contagem = { ativo: 0, pendente: 0, inadimplente: 0 };
+    for (const c of lista) {
+      if (contagem[c.status?.valor] !== undefined) contagem[c.status.valor]++;
+    }
+    return contagem;
+  }
+
+  function contarPorPlano(lista) {
+    const mapa = {};
+    for (const c of lista) {
+      const plano = c.plano || "Sem plano";
+      mapa[plano] = (mapa[plano] || 0) + 1;
+    }
+    return mapa;
+  }
+
+  function renderCartoes() {
+    const total = clientes.length;
+    const contagem = contarPorStatus(clientes);
+    const box = document.getElementById("cartoes");
+
+    const definicoes = [
+      { chave: null, rotulo: "Total de clientes", valor: total, cor: "#0d9488" },
+      { chave: "ativo", rotulo: "Ativos", valor: contagem.ativo, cor: COR.ativo },
+      { chave: "pendente", rotulo: "Pendentes", valor: contagem.pendente, cor: COR.pendente },
+      { chave: "inadimplente", rotulo: "Inadimplentes", valor: contagem.inadimplente, cor: COR.inadimplente },
+    ];
+
+    box.innerHTML = definicoes.map(d => {
+      const pct = total ? Math.round((d.valor / total) * 100) : 0;
+      const ativo = filtroStatus === d.chave ? " ativo-filtro" : "";
+      return `
+        <button class="cartao${ativo}" data-status="${d.chave ?? ""}">
+          <div class="rotulo"><span class="ponto" style="background:${d.cor}"></span>${d.rotulo}</div>
+          <div class="valor">${d.valor}${d.chave ? `<span class="pct">${pct}%</span>` : ""}</div>
+        </button>
+      `;
+    }).join("");
+
+    box.querySelectorAll("[data-status]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const valor = btn.dataset.status || null;
+        filtroStatus = filtroStatus === valor ? null : valor;
+        renderTudo();
+      });
+    });
+  }
+
+  function renderDonutELegenda() {
+    const total = clientes.length;
+    const contagem = contarPorStatus(clientes);
+    const donut = document.getElementById("donut");
+    const donutTotal = document.getElementById("donut-total");
+    const legenda = document.getElementById("legenda");
+
+    donutTotal.textContent = total;
+
+    if (total === 0) {
+      donut.style.background = "#eef1f4";
+    } else {
+      let acumulado = 0;
+      const partes = STATUS.map(s => {
+        const qtd = contagem[s];
+        if (!qtd) return null;
+        const inicio = acumulado;
+        acumulado += (qtd / total) * 360;
+        return `${COR[s]} ${inicio}deg ${acumulado}deg`;
+      }).filter(Boolean);
+      donut.style.background = partes.length ? `conic-gradient(${partes.join(", ")})` : "#eef1f4";
+    }
+
+    legenda.innerHTML = STATUS.map(s => {
+      const qtd = contagem[s];
+      const ativo = filtroStatus === s ? " ativo-filtro" : "";
+      return `
+        <button class="${ativo.trim()}" data-status="${s}">
+          <span class="ponto" style="background:${COR[s]}"></span>
+          ${ROTULO[s]}
+          <span class="qtd">${qtd}</span>
+        </button>
+      `;
+    }).join("");
+
+    legenda.querySelectorAll("[data-status]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const valor = btn.dataset.status;
+        filtroStatus = filtroStatus === valor ? null : valor;
+        renderTudo();
+      });
+    });
+  }
+
+  function renderBarras() {
+    const mapa = contarPorPlano(clientes);
+    const entradas = Object.entries(mapa).sort((a, b) => b[1] - a[1]);
+    const max = entradas.reduce((m, [, qtd]) => Math.max(m, qtd), 0) || 1;
+    const box = document.getElementById("barras");
+
+    if (entradas.length === 0) {
+      box.innerHTML = `<p style="color:var(--muted);font-size:.85rem;margin:0;">Sem dados de plano ainda.</p>`;
+      return;
+    }
+
+    box.innerHTML = entradas.map(([plano, qtd]) => `
+      <div class="barra-linha">
+        <span class="nome-plano" title="${plano}">${plano}</span>
+        <div class="barra-trilho"><div class="barra-fill" style="width:${(qtd / max) * 100}%"></div></div>
+        <span class="qtd-plano">${qtd}</span>
+      </div>
+    `).join("");
+  }
+
+  function popularFiltroPlano() {
+    const select = document.getElementById("filtro-plano");
+    const selecionado = select.value;
+    const planos = [...new Set(clientes.map(c => c.plano || "Sem plano"))].sort();
+    select.innerHTML = `<option value="">Todos os planos</option>` +
+      planos.map(p => `<option value="${p}">${p}</option>`).join("");
+    select.value = planos.includes(selecionado) ? selecionado : "";
+  }
+
+  function clientesFiltrados() {
+    return clientes.filter(c => {
+      const bateStatus = !filtroStatus || c.status?.valor === filtroStatus;
+      const batePlano = !filtroPlano || c.plano === filtroPlano;
+      const bateBusca = !termoBusca || c.nome.toLowerCase().includes(termoBusca);
+      return bateStatus && batePlano && bateBusca;
+    });
+  }
+
+  function renderTabela() {
+    const lista = clientesFiltrados();
+    const tbody = document.getElementById("tbody");
+    const estadoVazio = document.getElementById("estado-vazio");
+
+    if (lista.length === 0) {
+      tbody.innerHTML = "";
+      estadoVazio.hidden = false;
+      return;
+    }
+    estadoVazio.hidden = true;
+
+    tbody.innerHTML = lista.map(c => `
+      <tr>
+        <td>${c.nome}</td>
+        <td>${c.plano || "—"}</td>
+        <td><span class="badge ${c.status?.valor}">${ROTULO[c.status?.valor] ?? "—"}</span></td>
+        <td>${c.status?.atualizadoEm || "—"}</td>
+      </tr>
+    `).join("");
+  }
+
+  function renderTudo() {
+    renderCartoes();
+    renderDonutELegenda();
+    renderBarras();
+    renderTabela();
+  }
+
+  function iniciar() {
+    clientes = carregarClientes();
+    popularFiltroPlano();
+    renderTudo();
+  }
+
+  document.getElementById("busca").addEventListener("input", (e) => {
+    termoBusca = e.target.value.trim().toLowerCase();
+    renderTabela();
+  });
+
+  document.getElementById("filtro-plano").addEventListener("change", (e) => {
+    filtroPlano = e.target.value;
+    renderTabela();
+  });
+
+  document.getElementById("btn-limpar").addEventListener("click", () => {
+    filtroStatus = null;
+    filtroPlano = "";
+    termoBusca = "";
+    document.getElementById("busca").value = "";
+    document.getElementById("filtro-plano").value = "";
+    renderTudo();
+  });
+
+  // Mantém o dashboard atualizado se os clientes mudarem em outra aba (ex: index.html).
+  window.addEventListener("storage", (e) => {
+    if (e.key === CHAVE_ARMAZENAMENTO) iniciar();
+  });
+
+  document.getElementById("btn-sair").addEventListener("click", () => {
+    sessionStorage.removeItem("miniCrmToken");
+    sessionStorage.removeItem("miniCrmUsuario");
+    window.location.replace("login.html");
+  });
+
+  const usuario = sessionStorage.getItem("miniCrmUsuario");
+  if (usuario) {
+    document.getElementById("usuario-logado").textContent = `Logado como ${usuario}`;
+  }
+
+  iniciar();
+</script>
+</body>
+</html>

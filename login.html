@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Login — Gustavo Gabriel Simas</title>
+
+<style>
+  :root {
+    --bg:        #f4f6f8;
+    --surface:   #ffffff;
+    --ink:       #1a1d24;
+    --muted:     #6b7280;
+    --line:      #e3e7ec;
+    --accent:    #0d9488;
+    --accent-ink:#0a5f59;
+    --erro-bg:   #fde3e3;  --erro-fg: #c02626;
+
+    --radius: 10px;
+    --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-ui);
+    color: var(--ink);
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 2rem;
+    width: 100%; max-width: 360px;
+  }
+
+  h1 { font-size: 1.25rem; font-weight: 650; margin: 0 0 .25rem; letter-spacing: -0.01em; }
+  p.sub { margin: 0 0 1.5rem; color: var(--muted); font-size: .88rem; }
+
+  label {
+    display: block; font-size: .8rem; font-weight: 600; color: var(--muted);
+    margin: 0 0 .3rem;
+  }
+  .campo { margin-bottom: 1rem; }
+  input[type="text"], input[type="password"] {
+    width: 100%; font: inherit; padding: .6rem .75rem; border-radius: var(--radius);
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  button {
+    width: 100%; font: inherit; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--accent); background: var(--accent); color: #fff;
+    padding: .65rem .9rem; border-radius: var(--radius);
+    transition: background .15s ease; margin-top: .3rem;
+  }
+  button:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
+  button:disabled { opacity: .6; cursor: not-allowed; }
+  button:focus-visible { outline: 3px solid #99f6e4; outline-offset: 2px; }
+
+  .erro {
+    background: var(--erro-bg); color: var(--erro-fg); border-radius: 8px;
+    padding: .6rem .75rem; font-size: .85rem; margin-bottom: 1rem;
+  }
+
+  .dica {
+    margin-top: 1.25rem; font-size: .78rem; color: var(--muted);
+    border-top: 1px solid var(--line); padding-top: .9rem;
+  }
+  .dica code {
+    background: #fafbfc; border: 1px solid var(--line); border-radius: 4px;
+    padding: .05rem .35rem; font-size: .77rem;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Mini-CRM Lite</h1>
+    <p class="sub">Entre com seu usuário para continuar.</p>
+
+    <div id="erro" class="erro" hidden></div>
+
+    <form id="form-login" novalidate>
+      <div class="campo">
+        <label for="username">Usuário</label>
+        <input id="username" name="username" type="text" autocomplete="username" required />
+      </div>
+      <div class="campo">
+        <label for="password">Senha</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required />
+      </div>
+      <button id="btn-entrar" type="submit">Entrar</button>
+    </form>
+
+    <p class="dica">
+      Autenticação via <code>POST /auth/login</code> da fakestoreapi.com.
+      Usuário de teste: <code>mor_2314</code> / senha: <code>83r5^_</code>
+    </p>
+  </div>
+
+<script>
+  const CHAVE_TOKEN = "miniCrmToken";
+
+  // Já autenticado? pula direto para o app.
+  if (sessionStorage.getItem(CHAVE_TOKEN)) {
+    window.location.replace("dashboard.html");
+  }
+
+  function mostrarErro(mensagem) {
+    const box = document.getElementById("erro");
+    box.textContent = mensagem;
+    box.hidden = false;
+  }
+
+  function ocultarErro() {
+    document.getElementById("erro").hidden = true;
+  }
+
+  async function autenticar(username, password) {
+    const resp = await fetch("https://fakestoreapi.com/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (!resp.ok) {
+      throw new Error("Usuário ou senha inválidos.");
+    }
+
+    const dados = await resp.json();
+    if (!dados.token) {
+      throw new Error("Resposta inesperada do servidor de login.");
+    }
+    return dados.token;
+  }
+
+  document.getElementById("form-login").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    ocultarErro();
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    const botao = document.getElementById("btn-entrar");
+
+    if (!username || !password) {
+      mostrarErro("Preencha usuário e senha.");
+      return;
+    }
+
+    botao.disabled = true;
+    botao.textContent = "Entrando…";
+
+    try {
+      const token = await autenticar(username, password);
+      sessionStorage.setItem(CHAVE_TOKEN, token);
+      sessionStorage.setItem("miniCrmUsuario", username);
+      window.location.replace("dashboard.html");
+    } catch (erro) {
+      mostrarErro(erro.message || "Não foi possível entrar. Tente novamente.");
+      botao.disabled = false;
+      botao.textContent = "Entrar";
+    }
+  });
+</script>
+</body>
+</html>
