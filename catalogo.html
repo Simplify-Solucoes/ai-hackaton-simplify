@@ -151,6 +151,12 @@
     font-size: 1.02rem;
   }
 
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
   .button {
     min-height: 44px;
     display: inline-flex;
@@ -184,6 +190,13 @@
   }
 
   .button svg { width: 18px; height: 18px; }
+
+  .button.secondary {
+    color: var(--brand);
+    background: transparent;
+  }
+
+  .button.secondary:hover { color: #fff; background: var(--brand); }
 
   .stats {
     display: grid;
@@ -329,6 +342,24 @@
     fill: currentColor;
   }
 
+  .card-actions {
+    display: flex;
+    border-top: 1px solid var(--line);
+  }
+
+  .card-action {
+    min-height: 45px;
+    flex: 1;
+    border: 0;
+    color: var(--brand);
+    background: #fff;
+    font-size: .83rem;
+    font-weight: 780;
+  }
+
+  .card-action:hover { background: var(--brand-soft); }
+  .card-action:focus-visible { position: relative; outline: 3px solid rgba(24, 92, 59, .2); outline-offset: -3px; }
+
   .feedback {
     grid-column: 1 / -1;
     min-height: 310px;
@@ -378,6 +409,102 @@
   .toast.visible { transform: translateY(0); opacity: 1; }
   .toast.error { background: var(--danger); }
 
+  dialog {
+    width: min(620px, calc(100% - 28px));
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 20px;
+    color: var(--ink);
+    background: var(--surface);
+    box-shadow: 0 28px 80px rgba(23, 32, 27, .25);
+  }
+
+  dialog::backdrop {
+    background: rgba(16, 28, 21, .56);
+    backdrop-filter: blur(3px);
+  }
+
+  .modal-head {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 24px 26px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .modal-head h2 { margin: 0; font-size: 1.35rem; letter-spacing: -.03em; }
+  .modal-head p { margin: 5px 0 0; color: var(--muted); font-size: .88rem; }
+
+  .icon-button {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--muted);
+    background: #fff;
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .icon-button:hover { color: var(--ink); background: var(--surface-muted); }
+
+  .product-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 17px;
+    padding: 23px 26px 26px;
+  }
+
+  .field { display: grid; gap: 7px; }
+  .field.full { grid-column: 1 / -1; }
+
+  .field label {
+    font-size: .78rem;
+    font-weight: 760;
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    border: 1px solid #cdd4cf;
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--ink);
+    background: #fff;
+    outline: none;
+  }
+
+  .field textarea { min-height: 108px; resize: vertical; }
+  .field input:focus, .field textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(24, 92, 59, .11); }
+
+  .field-hint { color: var(--muted); font-size: .72rem; }
+
+  .form-error {
+    display: none;
+    grid-column: 1 / -1;
+    padding: 10px 12px;
+    border-radius: 9px;
+    color: var(--danger);
+    background: #fff0ee;
+    font-size: .83rem;
+    font-weight: 650;
+  }
+
+  .form-error.visible { display: block; }
+
+  .form-actions {
+    display: flex;
+    justify-content: end;
+    gap: 10px;
+    grid-column: 1 / -1;
+    padding-top: 4px;
+  }
+
   @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (max-width: 980px) {
@@ -388,7 +515,8 @@
     .header-inner, main { width: min(100% - 28px, 1180px); }
     main { padding-top: 34px; }
     .hero { align-items: stretch; flex-direction: column; }
-    .hero .button { width: 100%; }
+    .hero-actions { width: 100%; }
+    .hero-actions .button { flex: 1; }
     .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .product-image-wrap { height: 210px; }
   }
@@ -400,6 +528,10 @@
     .stat-label { margin: 0; }
     .product-grid { grid-template-columns: 1fr; }
     .product-image-wrap { height: 260px; }
+    .hero-actions { align-items: stretch; flex-direction: column; }
+    .product-form { grid-template-columns: 1fr; padding-inline: 19px; }
+    .field.full { grid-column: auto; }
+    .form-actions { grid-column: auto; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -433,13 +565,21 @@
         <h1 id="page-title">Produtos organizados, operação simples.</h1>
         <p class="hero-copy">Consulte o catálogo integrado à Fake Store API e acompanhe os principais indicadores em um só lugar.</p>
       </div>
-      <button class="button" id="btn-atualizar" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M20 6v5h-5M4 18v-5h5" />
-          <path d="M18.4 9A7 7 0 0 0 6.2 6.2L4 11m16 2-2.2 4.8A7 7 0 0 1 5.6 15" />
-        </svg>
-        Atualizar catálogo
-      </button>
+      <div class="hero-actions">
+        <button class="button secondary" id="btn-atualizar" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M20 6v5h-5M4 18v-5h5" />
+            <path d="M18.4 9A7 7 0 0 0 6.2 6.2L4 11m16 2-2.2 4.8A7 7 0 0 1 5.6 15" />
+          </svg>
+          Atualizar
+        </button>
+        <button class="button" id="btn-novo" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Novo produto
+        </button>
+      </div>
     </section>
 
     <section class="stats" aria-label="Resumo do catálogo">
@@ -476,10 +616,50 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <dialog id="product-dialog" aria-labelledby="form-title">
+    <div class="modal-head">
+      <div>
+        <h2 id="form-title">Novo produto</h2>
+        <p id="form-subtitle">Preencha os dados para adicionar um item ao catálogo.</p>
+      </div>
+      <button class="icon-button" id="btn-fechar-form" type="button" aria-label="Fechar formulário">×</button>
+    </div>
+    <form class="product-form" id="product-form">
+      <div class="field full">
+        <label for="product-title">Título</label>
+        <input id="product-title" name="title" required maxlength="140" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="product-price">Preço em dólar</label>
+        <input id="product-price" name="price" type="number" required min="0.01" step="0.01" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <label for="product-category">Categoria</label>
+        <input id="product-category" name="category" list="category-options" required maxlength="80" autocomplete="off" />
+        <datalist id="category-options"></datalist>
+      </div>
+      <div class="field full">
+        <label for="product-image">URL da imagem</label>
+        <input id="product-image" name="image" type="url" required placeholder="https://exemplo.com/produto.jpg" />
+        <span class="field-hint">Use uma URL pública com HTTPS.</span>
+      </div>
+      <div class="field full">
+        <label for="product-description">Descrição</label>
+        <textarea id="product-description" name="description" required maxlength="1000"></textarea>
+      </div>
+      <div class="form-error" id="form-error" role="alert"></div>
+      <div class="form-actions">
+        <button class="button secondary" id="btn-cancelar-form" type="button">Cancelar</button>
+        <button class="button" id="btn-salvar" type="submit">Cadastrar produto</button>
+      </div>
+    </form>
+  </dialog>
+
 <script>
   const API_URL = "https://fakestoreapi.com/products";
   const moeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD" });
   let produtos = [];
+  let produtoEmEdicao = null;
   let toastTimer;
 
   function criarElemento(tag, classe, texto) {
@@ -528,7 +708,15 @@
     rodape.appendChild(avaliacao);
 
     conteudo.appendChild(rodape);
-    card.append(imagemWrap, conteudo);
+
+    const acoes = criarElemento("div", "card-actions");
+    const editar = criarElemento("button", "card-action", "Editar produto");
+    editar.type = "button";
+    editar.dataset.action = "edit";
+    editar.dataset.id = produto.id;
+    acoes.appendChild(editar);
+
+    card.append(imagemWrap, conteudo, acoes);
     return card;
   }
 
@@ -575,6 +763,111 @@
     }, 3200);
   }
 
+  function atualizarOpcoesDeCategoria() {
+    const categorias = [...new Set(produtos.map(produto => produto.category).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b));
+    const opcoes = categorias.map(categoria => {
+      const option = document.createElement("option");
+      option.value = categoria;
+      return option;
+    });
+    document.getElementById("category-options").replaceChildren(...opcoes);
+  }
+
+  function encontrarProduto(id) {
+    return produtos.find(produto => String(produto.id) === String(id));
+  }
+
+  function abrirFormulario(produto = null) {
+    const dialog = document.getElementById("product-dialog");
+    const form = document.getElementById("product-form");
+    produtoEmEdicao = produto;
+    form.reset();
+    document.getElementById("form-error").classList.remove("visible");
+    atualizarOpcoesDeCategoria();
+
+    if (produto) {
+      document.getElementById("form-title").textContent = "Editar produto";
+      document.getElementById("form-subtitle").textContent = "Atualize as informações selecionadas.";
+      document.getElementById("btn-salvar").textContent = "Salvar alterações";
+      form.elements.title.value = produto.title || "";
+      form.elements.price.value = produto.price ?? "";
+      form.elements.category.value = produto.category || "";
+      form.elements.image.value = produto.image || "";
+      form.elements.description.value = produto.description || "";
+    } else {
+      document.getElementById("form-title").textContent = "Novo produto";
+      document.getElementById("form-subtitle").textContent = "Preencha os dados para adicionar um item ao catálogo.";
+      document.getElementById("btn-salvar").textContent = "Cadastrar produto";
+    }
+
+    dialog.showModal();
+    form.elements.title.focus();
+  }
+
+  function fecharFormulario() {
+    const dialog = document.getElementById("product-dialog");
+    if (dialog.open) dialog.close();
+    produtoEmEdicao = null;
+  }
+
+  async function salvarProduto(evento) {
+    evento.preventDefault();
+    const form = evento.currentTarget;
+    if (!form.reportValidity()) return;
+
+    const botao = document.getElementById("btn-salvar");
+    const erroBox = document.getElementById("form-error");
+    const editando = Boolean(produtoEmEdicao);
+    const idAtual = produtoEmEdicao?.id;
+    const dados = new FormData(form);
+    const payload = {
+      title: dados.get("title").trim(),
+      price: Number(dados.get("price")),
+      category: dados.get("category").trim(),
+      image: dados.get("image").trim(),
+      description: dados.get("description").trim(),
+    };
+
+    botao.disabled = true;
+    botao.textContent = editando ? "Salvando..." : "Cadastrando...";
+    erroBox.classList.remove("visible");
+
+    try {
+      const resposta = await fetch(editando ? `${API_URL}/${idAtual}` : API_URL, {
+        method: editando ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!resposta.ok) throw new Error(`A API respondeu com o status ${resposta.status}.`);
+
+      const respostaApi = await resposta.json();
+      if (editando) {
+        produtos = produtos.map(produto =>
+          String(produto.id) === String(idAtual)
+            ? { ...produto, ...payload, id: produto.id }
+            : produto
+        );
+      } else {
+        const idRecebido = respostaApi.id;
+        const idJaExiste = produtos.some(produto => String(produto.id) === String(idRecebido));
+        const idLocal = idRecebido && !idJaExiste ? idRecebido : Date.now();
+        produtos = [{ ...payload, id: idLocal, rating: { rate: 0, count: 0 } }, ...produtos];
+      }
+
+      renderizarProdutos();
+      fecharFormulario();
+      mostrarToast(editando ? "Produto atualizado com sucesso." : "Produto cadastrado com sucesso.");
+    } catch (erro) {
+      console.error("Falha ao salvar produto:", erro);
+      erroBox.textContent = `Não foi possível salvar. ${erro.message}`;
+      erroBox.classList.add("visible");
+    } finally {
+      botao.disabled = false;
+      botao.textContent = editando ? "Salvar alterações" : "Cadastrar produto";
+    }
+  }
+
   async function carregarProdutos() {
     const botao = document.getElementById("btn-atualizar");
     botao.disabled = true;
@@ -598,6 +891,17 @@
   }
 
   document.getElementById("btn-atualizar").addEventListener("click", carregarProdutos);
+  document.getElementById("btn-novo").addEventListener("click", () => abrirFormulario());
+  document.getElementById("btn-fechar-form").addEventListener("click", fecharFormulario);
+  document.getElementById("btn-cancelar-form").addEventListener("click", fecharFormulario);
+  document.getElementById("product-form").addEventListener("submit", salvarProduto);
+  document.getElementById("product-grid").addEventListener("click", evento => {
+    const botao = evento.target.closest("[data-action='edit']");
+    if (botao) abrirFormulario(encontrarProduto(botao.dataset.id));
+  });
+  document.getElementById("product-dialog").addEventListener("click", evento => {
+    if (evento.target === evento.currentTarget) fecharFormulario();
+  });
   carregarProdutos();
 </script>
 </body>
