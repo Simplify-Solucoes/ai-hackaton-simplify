@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Entrar — Mini-CRM Lite</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+    <a class="auth-back" href="index.html">← Voltar ao app</a>
+
+    <header>
+      <h1>Entrar</h1>
+      <p>Autenticação de demonstração via <code>fakestoreapi.com/auth/login</code>.</p>
+    </header>
+
+    <form id="form-login">
+      <div class="field" style="margin-bottom:.9rem">
+        <label for="input-username">Usuário</label>
+        <input id="input-username" name="username" type="text" autocomplete="username" />
+      </div>
+      <div class="field" style="margin-bottom:.9rem">
+        <label for="input-password">Senha</label>
+        <input id="input-password" name="password" type="password" autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn-block" id="btn-login">Entrar</button>
+      <div class="auth-feedback" id="auth-feedback"></div>
+    </form>
+
+    <div id="auth-success" class="auth-success" hidden>
+      <p>Login realizado com sucesso como <strong id="auth-success-user"></strong>.</p>
+      <div class="token" id="auth-success-token"></div>
+      <a href="index.html"><button type="button" class="btn-block">Ir para o app</button></a>
+    </div>
+
+    <div class="auth-hint">
+      Contas de demonstração da fakestoreapi:<br />
+      <code>mor_2314</code> / <code>83r5^_</code><br />
+      <code>johnd</code> / <code>m38rmF$</code><br />
+      Este login não bloqueia o acesso ao app — é apenas uma demonstração de integração.
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>
