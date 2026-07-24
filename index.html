@@ -3,34 +3,531 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Simplify CRM</title>
+<meta name="description" content="Simplify CRM — clientes, catálogo e operação sem complicação." />
+<title>Simplify CRM — Operação clara, time alinhado</title>
 <script src="auth.js"></script>
 <style>
-  body {
-    min-height: 100vh; display: grid; place-items: center; margin: 0;
-    color: #1f2328; background: #f6f8fa;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  :root {
+    color-scheme: light;
+    --dark: #0d1117;
+    --dark-soft: #161b22;
+    --dark-line: #30363d;
+    --surface: #ffffff;
+    --canvas: #f6f8fa;
+    --ink: #1f2328;
+    --muted: #656d76;
+    --line: #d0d7de;
+    --green: #238636;
+    --green-hover: #2ea043;
+    --blue: #0969da;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
-  main { max-width: 560px; padding: 32px; text-align: center; }
-  h1 { margin: 0 0 10px; letter-spacing: -.04em; }
-  p { margin: 0 0 24px; color: #656d76; }
-  a {
-    display: inline-block; padding: 10px 16px; border-radius: 7px;
-    color: #fff; background: #1f883d; font-weight: 650; text-decoration: none;
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    color: var(--ink);
+    background: var(--surface);
+    font-family: var(--font);
+    line-height: 1.5;
+  }
+
+  a { color: inherit; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  .container { width: min(1120px, calc(100% - 40px)); margin-inline: auto; }
+
+  .site-header {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 10;
+    border-bottom: 1px solid rgba(240, 246, 252, .12);
+    color: #f0f6fc;
+  }
+
+  .nav {
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-weight: 720;
+    letter-spacing: -.025em;
+    text-decoration: none;
+  }
+
+  .brand-mark {
+    width: 35px;
+    height: 35px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--dark-line);
+    border-radius: 9px;
+    background: var(--dark-soft);
+  }
+
+  .brand-mark svg { width: 20px; height: 20px; }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-right: auto;
+  }
+
+  .nav-links a {
+    color: #b1bac4;
+    font-size: .88rem;
+    font-weight: 550;
+    text-decoration: none;
+  }
+
+  .nav-links a:hover { color: #fff; }
+
+  .nav-actions { display: flex; align-items: center; gap: 10px; }
+
+  .nav-login {
+    padding: 8px 12px;
+    color: #f0f6fc;
+    font-size: .88rem;
+    text-decoration: none;
+  }
+
+  .nav-cta,
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 16px;
+    border: 1px solid rgba(240, 246, 252, .35);
+    border-radius: 7px;
+    color: #fff;
+    background: transparent;
+    font-weight: 650;
+    text-decoration: none;
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
+  }
+
+  .nav-cta { min-height: 38px; padding-inline: 13px; font-size: .86rem; }
+  .nav-cta:hover { border-color: #f0f6fc; background: rgba(255, 255, 255, .06); }
+
+  .hero {
+    overflow: hidden;
+    padding: 148px 0 82px;
+    color: #f0f6fc;
+    background:
+      radial-gradient(circle at 78% 30%, rgba(35, 134, 54, .2), transparent 30%),
+      var(--dark);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(430px, .95fr);
+    align-items: center;
+    gap: 70px;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    color: #7ee787;
+    font-size: .8rem;
+    font-weight: 700;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #3fb950;
+    box-shadow: 0 0 0 5px rgba(63, 185, 80, .12);
+  }
+
+  h1 {
+    max-width: 650px;
+    margin: 0;
+    font-size: clamp(3rem, 6vw, 5.6rem);
+    line-height: .95;
+    letter-spacing: -.065em;
+  }
+
+  .hero-copy {
+    max-width: 590px;
+    margin: 25px 0 30px;
+    color: #b1bac4;
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+  }
+
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  .button.primary {
+    border-color: var(--green);
+    background: var(--green);
+  }
+
+  .button.primary:hover {
+    border-color: var(--green-hover);
+    background: var(--green-hover);
+    transform: translateY(-1px);
+  }
+
+  .button svg { width: 18px; height: 18px; }
+
+  .trust {
+    margin: 24px 0 0;
+    color: #7d8590;
+    font-size: .78rem;
+  }
+
+  .product-window {
+    overflow: hidden;
+    border: 1px solid var(--dark-line);
+    border-radius: 12px;
+    background: var(--dark-soft);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, .38);
+  }
+
+  .window-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 46px;
+    padding: 0 15px;
+    border-bottom: 1px solid var(--dark-line);
+  }
+
+  .dots { display: flex; gap: 7px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #484f58; }
+  .window-title { color: #8c959f; font-family: ui-monospace, monospace; font-size: .72rem; }
+
+  .dashboard-preview { padding: 19px; }
+  .preview-head { display: flex; align-items: end; justify-content: space-between; margin-bottom: 16px; }
+  .preview-label { color: #8c959f; font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; }
+  .preview-number { display: block; margin-top: 3px; color: #f0f6fc; font-size: 1.45rem; font-weight: 700; }
+  .preview-add { color: #7ee787; font-size: .72rem; }
+
+  .customer-list { overflow: hidden; border: 1px solid var(--dark-line); border-radius: 7px; }
+
+  .customer {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    align-items: center;
+    gap: 11px;
+    padding: 12px;
+    border-bottom: 1px solid var(--dark-line);
+  }
+  .customer:last-child { border-bottom: 0; }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    color: #f0f6fc;
+    background: #30363d;
+    font-size: .7rem;
+    font-weight: 700;
+  }
+
+  .customer strong { display: block; color: #f0f6fc; font-size: .78rem; }
+  .customer small { color: #8c959f; font-size: .67rem; }
+
+  .status {
+    padding: 3px 8px;
+    border: 1px solid rgba(63, 185, 80, .35);
+    border-radius: 999px;
+    color: #7ee787;
+    background: rgba(35, 134, 54, .13);
+    font-size: .65rem;
+    font-weight: 650;
+  }
+
+  .status.pending {
+    border-color: rgba(210, 153, 34, .35);
+    color: #e3b341;
+    background: rgba(187, 128, 9, .12);
+  }
+
+  .features { padding: 88px 0; background: var(--surface); }
+  .section-kicker { margin: 0 0 8px; color: var(--blue); font-size: .78rem; font-weight: 700; }
+
+  .section-title {
+    max-width: 700px;
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.3rem);
+    line-height: 1.08;
+    letter-spacing: -.045em;
+  }
+
+  .section-copy { max-width: 630px; margin: 16px 0 0; color: var(--muted); font-size: 1.02rem; }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 42px;
+  }
+
+  .feature-card {
+    min-height: 245px;
+    padding: 25px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--canvas);
+  }
+
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 38px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--ink);
+    background: #fff;
+  }
+
+  .feature-icon svg { width: 20px; height: 20px; }
+  .feature-card h3 { margin: 0 0 8px; font-size: 1.05rem; }
+  .feature-card p { margin: 0; color: var(--muted); font-size: .88rem; }
+
+  .workflow { padding: 82px 0; border-block: 1px solid var(--line); background: var(--canvas); }
+
+  .workflow-grid {
+    display: grid;
+    grid-template-columns: .8fr 1.2fr;
+    align-items: center;
+    gap: 70px;
+  }
+
+  .steps { overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  .step { display: grid; grid-template-columns: 34px 1fr; gap: 13px; padding: 19px; border-bottom: 1px solid var(--line); }
+  .step:last-child { border-bottom: 0; }
+  .step-number {
+    width: 30px; height: 30px; display: grid; place-items: center;
+    border-radius: 50%; color: #fff; background: var(--ink); font-size: .75rem; font-weight: 700;
+  }
+  .step h3 { margin: 2px 0 4px; font-size: .92rem; }
+  .step p { margin: 0; color: var(--muted); font-size: .8rem; }
+
+  .final-cta { padding: 90px 0; text-align: center; }
+  .final-cta h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -.045em; }
+  .final-cta p { margin: 12px 0 25px; color: var(--muted); }
+  .final-cta .button { color: #fff; }
+
+  footer { padding: 26px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: .8rem; }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+
+  @media (max-width: 900px) {
+    .hero-grid, .workflow-grid { grid-template-columns: 1fr; }
+    .hero-grid { gap: 48px; }
+    .product-window { max-width: 620px; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .feature-card { min-height: auto; }
+    .feature-icon { margin-bottom: 22px; }
+  }
+
+  @media (max-width: 680px) {
+    .container { width: min(100% - 28px, 1120px); }
+    .nav { gap: 12px; }
+    .nav-links { display: none; }
+    .nav-actions { margin-left: auto; }
+    .nav-login { display: none; }
+    .hero { padding-top: 124px; }
+    h1 { font-size: clamp(2.7rem, 14vw, 4.3rem); }
+    .hero-actions { align-items: stretch; flex-direction: column; }
+    .button { width: 100%; }
+    .footer-inner { align-items: start; flex-direction: column; }
   }
 </style>
 </head>
 <body>
+  <header class="site-header">
+    <nav class="nav container" aria-label="Navegação principal">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z" />
+            <path d="m4.3 7.7 7.7 4.5 7.7-4.5M12 12.2V21" />
+          </svg>
+        </span>
+        Simplify CRM
+      </a>
+      <div class="nav-links">
+        <a href="#recursos">Recursos</a>
+        <a href="#fluxo">Como funciona</a>
+      </div>
+      <div class="nav-actions">
+        <a class="nav-login" id="login-link" href="login.html">Entrar</a>
+        <a class="nav-cta" id="nav-cta" href="login.html">Começar agora</a>
+      </div>
+    </nav>
+  </header>
+
   <main>
-    <h1>Simplify CRM</h1>
-    <p>Clientes, catálogo e operação em um só lugar.</p>
-    <a id="primary-link" href="login.html">Entrar no CRM</a>
+    <section class="hero">
+      <div class="hero-grid container">
+        <div>
+          <span class="eyebrow">CRM leve para times que executam</span>
+          <h1>Menos planilhas. Mais contexto.</h1>
+          <p class="hero-copy">Organize clientes, acompanhe status e cuide do catálogo em uma operação clara, rápida e sem camadas desnecessárias.</p>
+          <div class="hero-actions">
+            <a class="button primary" id="hero-cta" href="login.html">
+              Acessar o CRM
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </a>
+            <a class="button" href="#recursos">Conhecer recursos</a>
+          </div>
+          <p class="trust">Dados salvos localmente · Integração Fake Store API · Sem configuração</p>
+        </div>
+
+        <div class="product-window" aria-label="Prévia do painel de clientes">
+          <div class="window-bar">
+            <div class="dots" aria-hidden="true">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <span class="window-title">simplify / clientes</span>
+          </div>
+          <div class="dashboard-preview">
+            <div class="preview-head">
+              <div>
+                <span class="preview-label">Clientes ativos</span>
+                <strong class="preview-number">24</strong>
+              </div>
+              <span class="preview-add">+ Novo cliente</span>
+            </div>
+            <div class="customer-list">
+              <div class="customer">
+                <span class="avatar">AS</span>
+                <span><strong>Ana Souza</strong><small>Plano Pro</small></span>
+                <span class="status">Ativo</span>
+              </div>
+              <div class="customer">
+                <span class="avatar">BL</span>
+                <span><strong>Bruno Lima</strong><small>Plano Básico</small></span>
+                <span class="status pending">Pendente</span>
+              </div>
+              <div class="customer">
+                <span class="avatar">CD</span>
+                <span><strong>Carla Dias</strong><small>Plano Enterprise</small></span>
+                <span class="status">Ativo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="recursos">
+      <div class="container">
+        <p class="section-kicker">Tudo no lugar certo</p>
+        <h2 class="section-title">O essencial para operar bem, sem transformar o CRM em um projeto.</h2>
+        <p class="section-copy">Uma visão direta dos clientes e produtos, com ações rápidas e histórico suficiente para o time não perder contexto.</p>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8m13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </span>
+            <h3>Clientes organizados</h3>
+            <p>Cadastre, importe, altere status e exclua clientes em poucos cliques.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z" />
+                <path d="m4.3 7.7 7.7 4.5 7.7-4.5M12 12.2V21" />
+              </svg>
+            </span>
+            <h3>Catálogo completo</h3>
+            <p>CRUD de produtos, busca, filtros e ordenação integrados à Fake Store API.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+            </span>
+            <h3>Continuidade local</h3>
+            <p>Os dados dos clientes permanecem disponíveis no navegador entre acessos.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="workflow" id="fluxo">
+      <div class="workflow-grid container">
+        <div>
+          <p class="section-kicker">Fluxo simples</p>
+          <h2 class="section-title">Entre e comece a trabalhar.</h2>
+          <p class="section-copy">Sem onboarding longo, configurações escondidas ou telas que disputam sua atenção.</p>
+        </div>
+        <div class="steps">
+          <article class="step">
+            <span class="step-number">1</span>
+            <div><h3>Acesse com sua conta</h3><p>Autenticação integrada à Fake Store API.</p></div>
+          </article>
+          <article class="step">
+            <span class="step-number">2</span>
+            <div><h3>Organize sua base</h3><p>Clientes, planos e status reunidos em uma única visão.</p></div>
+          </article>
+          <article class="step">
+            <span class="step-number">3</span>
+            <div><h3>Gerencie o catálogo</h3><p>Crie, edite, filtre e remova produtos quando precisar.</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="container">
+        <h2>Seu CRM pode ser simples.</h2>
+        <p>Abra o painel e mantenha a operação em movimento.</p>
+        <a class="button primary" id="footer-cta" href="login.html">Começar agora</a>
+      </div>
+    </section>
   </main>
+
+  <footer>
+    <div class="footer-inner container">
+      <span>© 2026 Simplify CRM</span>
+      <span>Feito para operações que valorizam clareza.</span>
+    </div>
+  </footer>
+
 <script>
   if (CrmAuth.isAuthenticated()) {
-    const link = document.getElementById("primary-link");
-    link.href = "clientes.html";
-    link.textContent = "Abrir CRM";
+    const authenticatedLinks = [
+      document.getElementById("nav-cta"),
+      document.getElementById("hero-cta"),
+      document.getElementById("footer-cta"),
+    ];
+    authenticatedLinks.forEach(link => {
+      link.href = "clientes.html";
+      link.textContent = "Abrir painel";
+    });
+    const loginLink = document.getElementById("login-link");
+    loginLink.href = "clientes.html";
+    loginLink.textContent = "Painel";
   }
 </script>
 </body>
