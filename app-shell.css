@@ -1,0 +1,113 @@
+.app-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid #30363d;
+  color: #f0f6fc;
+  background: #24292f;
+}
+
+.app-shell-inner {
+  width: min(1180px, calc(100% - 40px));
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-inline: auto;
+}
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #fff;
+  font-weight: 720;
+  letter-spacing: -.025em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-brand-mark {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #484f58;
+  border-radius: 8px;
+  background: #30363d;
+}
+
+.app-brand-mark svg { width: 18px; height: 18px; }
+
+.app-navigation {
+  align-self: stretch;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.app-nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 6px;
+  color: #b1bac4;
+  font-size: .86rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.app-nav-link:hover { color: #fff; background: rgba(177, 186, 196, .12); }
+
+.app-nav-link.active { color: #fff; }
+.app-nav-link.active::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: 0;
+  left: 12px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: #f78166;
+}
+
+.app-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.app-username {
+  max-width: 150px;
+  overflow: hidden;
+  color: #b1bac4;
+  font-size: .78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-logout {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid #484f58;
+  border-radius: 6px;
+  color: #f0f6fc;
+  background: transparent;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app-logout:hover { border-color: #8c959f; background: #30363d; }
+.app-logout:focus-visible { outline: 2px solid #58a6ff; outline-offset: 2px; }
+
+@media (max-width: 680px) {
+  .app-shell-inner { width: min(100% - 24px, 1180px); gap: 10px; }
+  .app-brand span:last-child { display: none; }
+  .app-navigation { gap: 0; }
+  .app-nav-link { padding-inline: 9px; }
+  .app-username { display: none; }
+}

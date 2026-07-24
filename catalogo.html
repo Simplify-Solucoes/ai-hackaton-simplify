@@ -7,6 +7,7 @@
 <title>Catálogo de produtos — Estoque</title>
 <script src="auth.js"></script>
 <script>CrmAuth.requireAuth();</script>
+<link rel="stylesheet" href="app-shell.css" />
 
 <style>
   :root {
@@ -635,21 +636,25 @@
 </style>
 </head>
 <body>
-  <header class="app-header">
-    <div class="header-inner">
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true">
+  <header class="app-topbar">
+    <div class="app-shell-inner">
+      <a class="app-brand" href="index.html">
+        <span class="app-brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z" />
             <path d="m4.3 7.7 7.7 4.5 7.7-4.5M12 12.2V21" />
           </svg>
         </span>
-        Estoque
-      </div>
-      <div class="header-actions">
-        <a class="back-link" href="clientes.html">Clientes</a>
-        <button class="back-link logout-link" type="button" onclick="CrmAuth.logout()">Sair</button>
-        <span class="api-status">Fake Store API conectada</span>
+        <span>Simplify CRM</span>
+      </a>
+      <nav class="app-navigation" aria-label="Navegação do CRM">
+        <a class="app-nav-link" href="clientes.html">Clientes</a>
+        <a class="app-nav-link active" href="catalogo.html">Produtos</a>
+      </nav>
+      <div class="app-user">
+        <span class="api-status">API conectada</span>
+        <span class="app-username" data-session-user></span>
+        <button class="app-logout" type="button" onclick="CrmAuth.logout()">Sair</button>
       </div>
     </div>
   </header>
@@ -1168,6 +1173,7 @@
   document.getElementById("search-products").addEventListener("input", renderizarProdutos);
   document.getElementById("filter-category").addEventListener("change", renderizarProdutos);
   document.getElementById("sort-products").addEventListener("change", renderizarProdutos);
+  document.querySelector("[data-session-user]").textContent = CrmAuth.readSession()?.username || "";
   carregarProdutos();
 </script>
 </body>

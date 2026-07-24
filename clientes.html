@@ -6,6 +6,7 @@
 <title>Clientes — Simplify CRM</title>
 <script src="auth.js"></script>
 <script>CrmAuth.requireAuth();</script>
+<link rel="stylesheet" href="app-shell.css" />
 
 <style>
   :root {
@@ -158,22 +159,106 @@
   .log .linha.alerta { color: #ff8a8a; }
   .log .vazio { color: #5b6472; }
 
+  .page-heading { margin-bottom: 24px; }
+  .page-heading .eyebrow {
+    margin: 0 0 5px; color: #0969da; font-size: .74rem;
+    font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .page-heading h1 {
+    margin: 0; font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.05; letter-spacing: -.045em;
+  }
+  .page-heading p:last-child { margin: 9px 0 0; color: var(--muted); }
+
+  .client-stats {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px; margin-bottom: 18px;
+  }
+  .client-stat {
+    padding: 16px 18px; border: 1px solid var(--line);
+    border-radius: 8px; background: #fff;
+  }
+  .client-stat span {
+    display: block; margin-bottom: 3px; color: var(--muted);
+    font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .client-stat strong { font-size: 1.35rem; letter-spacing: -.03em; }
+
+  body { padding: 0; color: #1f2328; background: #f6f8fa; }
+  .app-topbar { margin-bottom: 0; }
+  .wrap { width: min(1040px, calc(100% - 40px)); max-width: none; margin: 0 auto; padding: 46px 0 70px; }
+  .bar { margin-bottom: 18px; }
+  .bar > button, .bar > .button-link, .client-form button[type="submit"] {
+    min-height: 38px; border-radius: 6px; font-weight: 650;
+  }
+  .bar > button, .client-form button[type="submit"] {
+    border-color: rgba(27, 31, 36, .15); background: #1f883d;
+  }
+  .bar > button:hover, .client-form button[type="submit"]:hover {
+    border-color: rgba(27, 31, 36, .15); background: #1a7f37;
+  }
+  .button-link.secondary {
+    border-color: #d0d7de; color: #1f2328; background: #f6f8fa;
+    box-shadow: 0 1px 0 rgba(27, 31, 36, .04);
+  }
+  .button-link.secondary:hover { border-color: #afb8c1; color: #1f2328; background: #f3f4f6; }
+  .card { border-color: #d0d7de; border-radius: 8px; background: #fff; }
+  th { color: #57606a; background: #f6f8fa; }
+  th, td { padding: .85rem 1rem; }
+  .delete-button { min-height: 32px; color: #cf222e; background: #fff; }
+  .delete-button:hover { border-color: #cf222e; color: #fff; background: #cf222e; }
+  .log { border: 1px solid #30363d; border-radius: 8px; background: #0d1117; }
+  dialog { border: 1px solid #d0d7de; border-radius: 10px; }
+
+  @media (max-width: 680px) {
+    .wrap { width: min(100% - 24px, 1040px); padding-top: 30px; }
+    .client-stats { grid-template-columns: 1fr; }
+  }
+
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Mini-CRM Lite</h1>
-    <p>Gestão de clientes com persistência local — starter do hackathon.</p>
-  </header>
+<header class="app-topbar">
+  <div class="app-shell-inner">
+    <a class="app-brand" href="index.html">
+      <span class="app-brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z" />
+          <path d="m4.3 7.7 7.7 4.5 7.7-4.5M12 12.2V21" />
+        </svg>
+      </span>
+      <span>Simplify CRM</span>
+    </a>
+    <nav class="app-navigation" aria-label="Navegação do CRM">
+      <a class="app-nav-link active" href="clientes.html">Clientes</a>
+      <a class="app-nav-link" href="catalogo.html">Produtos</a>
+    </nav>
+    <div class="app-user">
+      <span class="app-username" data-session-user></span>
+      <button class="app-logout" type="button" onclick="CrmAuth.logout()">Sair</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="page-heading">
+    <p class="eyebrow">Relacionamento</p>
+    <h1>Clientes</h1>
+    <p>Gerencie sua base, planos e situação de cada conta.</p>
+  </section>
 
   <div class="bar">
     <button id="btn-novo-cliente">Novo cliente</button>
     <button id="btn-importar">Importar clientes</button>
-    <a class="button-link secondary" href="catalogo.html">Acessar catálogo</a>
-    <button class="button-link secondary" type="button" onclick="CrmAuth.logout()">Sair</button>
+    <a class="button-link secondary" href="catalogo.html">Ver catálogo</a>
   </div>
+
+  <section class="client-stats" aria-label="Resumo dos clientes">
+    <article class="client-stat"><span>Total</span><strong id="stat-client-total">0</strong></article>
+    <article class="client-stat"><span>Ativos</span><strong id="stat-client-active">0</strong></article>
+    <article class="client-stat"><span>Precisam de atenção</span><strong id="stat-client-attention">0</strong></article>
+  </section>
 
   <div class="card">
     <table>
@@ -188,7 +273,7 @@
     <h2>Log de ações</h2>
     <div id="log"></div>
   </div>
-</div>
+</main>
 
 <dialog id="client-dialog" aria-labelledby="client-dialog-title">
   <div class="dialog-head">
@@ -360,6 +445,12 @@
       tr.appendChild(td);
       tbody.appendChild(tr);
     }
+
+    document.getElementById("stat-client-total").textContent = clientes.length;
+    document.getElementById("stat-client-active").textContent =
+      clientes.filter(cliente => cliente.status.valor === "ativo").length;
+    document.getElementById("stat-client-attention").textContent =
+      clientes.filter(cliente => cliente.status.valor !== "ativo").length;
   }
 
   function adicionarCliente({ nome, plano, status }) {
@@ -504,6 +595,7 @@
   if (estadoInicial.restaurado) {
     registrarLog(`${clientes.length} clientes restaurados do cache local.`);
   }
+  document.querySelector("[data-session-user]").textContent = CrmAuth.readSession()?.username || "";
 </script>
 </body>
 </html>
