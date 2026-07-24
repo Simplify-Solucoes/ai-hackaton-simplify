@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="description" content="Catálogo de produtos integrado à Fake Store API" />
 <title>Catálogo de produtos — Estoque</title>
+<script src="auth.js"></script>
+<script>CrmAuth.requireAuth();</script>
 
 <style>
   :root {
@@ -107,6 +109,7 @@
 
   .back-link:hover { text-decoration: underline; }
   .back-link:focus-visible { outline: 3px solid rgba(24, 92, 59, .22); outline-offset: 4px; }
+  .logout-link { padding: 0; border: 0; background: transparent; }
 
   .api-status::before {
     content: "";
@@ -644,7 +647,8 @@
         Estoque
       </div>
       <div class="header-actions">
-        <a class="back-link" href="index.html">Clientes</a>
+        <a class="back-link" href="clientes.html">Clientes</a>
+        <button class="back-link logout-link" type="button" onclick="CrmAuth.logout()">Sair</button>
         <span class="api-status">Fake Store API conectada</span>
       </div>
     </div>

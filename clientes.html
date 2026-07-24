@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Clientes — Simplify CRM</title>
+<script src="auth.js"></script>
+<script>CrmAuth.requireAuth();</script>
+
+<style>
+  :root {
+    --bg:        #f4f6f8;
+    --surface:   #ffffff;
+    --ink:       #1a1d24;
+    --muted:     #6b7280;
+    --line:      #e3e7ec;
+    --accent:    #0d9488;
+    --accent-ink:#0a5f59;
+
+    --ativo-bg:  #e7f6ec;  --ativo-fg:  #157347;
+    --pend-bg:   #fdf1dd;  --pend-fg:   #b45309;
+    --inad-bg:   #fde3e3;  --inad-fg:   #c02626;
+
+    --radius: 10px;
+    --font-ui:   system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-ui);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+    padding: 2rem 1rem;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 1.5rem; }
+  header h1 {
+    font-size: 1.35rem; font-weight: 650; letter-spacing: -0.01em; margin: 0;
+  }
+  header p { margin: .25rem 0 0; color: var(--muted); font-size: .9rem; }
+
+  .bar {
+    display: flex; gap: .6rem; align-items: center;
+    margin-bottom: 1rem; flex-wrap: wrap;
+  }
+  button, .button-link {
+    display: inline-flex; align-items: center; justify-content: center;
+    font: inherit; font-weight: 550; cursor: pointer;
+    border: 1px solid var(--accent); background: var(--accent); color: #fff;
+    padding: .5rem .9rem; border-radius: var(--radius);
+    text-decoration: none; transition: background .15s ease;
+  }
+  button:hover, .button-link:hover {
+    background: var(--accent-ink); border-color: var(--accent-ink);
+  }
+  button:focus-visible, .button-link:focus-visible {
+    outline: 3px solid #99f6e4; outline-offset: 2px;
+  }
+  button:disabled { cursor: wait; opacity: .7; }
+  .button-link.secondary {
+    color: var(--accent-ink); background: transparent;
+  }
+  .button-link.secondary:hover { color: #fff; background: var(--accent-ink); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); overflow-x: auto;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td {
+    text-align: left; padding: .8rem 1rem; border-bottom: 1px solid var(--line);
+    font-size: .92rem; vertical-align: middle;
+  }
+  th {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); font-weight: 600; background: #fafbfc;
+  }
+  tr:last-child td { border-bottom: none; }
+  td .nome { font-weight: 550; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: .2rem .6rem; border-radius: 999px;
+    font-size: .78rem; font-weight: 600;
+  }
+  .badge.ativo        { background: var(--ativo-bg); color: var(--ativo-fg); }
+  .badge.pendente     { background: var(--pend-bg);  color: var(--pend-fg); }
+  .badge.inadimplente { background: var(--inad-bg);  color: var(--inad-fg); }
+
+  select {
+    font: inherit; padding: .35rem .5rem; border-radius: 8px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .delete-button {
+    padding: .35rem .55rem;
+    border-color: #efb4b4;
+    color: #b42318;
+    background: #fff;
+    font-size: .78rem;
+  }
+  .delete-button:hover { border-color: #b42318; background: #b42318; }
+
+  dialog {
+    width: min(440px, calc(100% - 2rem));
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 14px;
+    color: var(--ink);
+    background: var(--surface);
+    box-shadow: 0 24px 70px rgba(17, 24, 39, .22);
+  }
+  dialog::backdrop { background: rgba(17, 24, 39, .5); }
+
+  .dialog-head {
+    display: flex; align-items: start; justify-content: space-between; gap: 1rem;
+    padding: 1.2rem 1.3rem; border-bottom: 1px solid var(--line);
+  }
+  .dialog-head h2 { margin: 0; font-size: 1.1rem; }
+  .dialog-head p { margin: .2rem 0 0; color: var(--muted); font-size: .82rem; }
+  .close-button {
+    width: 34px; height: 34px; padding: 0;
+    border-color: var(--line); color: var(--muted); background: #fff;
+    font-size: 1.15rem;
+  }
+
+  .client-form { display: grid; gap: 1rem; padding: 1.25rem 1.3rem 1.3rem; }
+  .field { display: grid; gap: .35rem; }
+  .field label { font-size: .78rem; font-weight: 650; }
+  .field input, .field select {
+    width: 100%; padding: .6rem .7rem; border: 1px solid var(--line);
+    border-radius: 8px; color: var(--ink); background: #fff;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent); outline: 3px solid rgba(13, 148, 136, .12);
+  }
+  .form-actions { display: flex; justify-content: end; gap: .6rem; padding-top: .2rem; }
+
+  .log {
+    margin-top: 1.25rem; background: #12151c; color: #cfd6e0;
+    border-radius: var(--radius); padding: .9rem 1rem;
+    font-family: var(--font-mono); font-size: .82rem; min-height: 3rem;
+  }
+  .log h2 {
+    font-family: var(--font-ui); font-size: .72rem; text-transform: uppercase;
+    letter-spacing: .06em; color: #8b94a3; margin: 0 0 .5rem; font-weight: 600;
+  }
+  .log .linha { white-space: pre-wrap; }
+  .log .linha.alerta { color: #ff8a8a; }
+  .log .vazio { color: #5b6472; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Mini-CRM Lite</h1>
+    <p>Gestão de clientes com persistência local — starter do hackathon.</p>
+  </header>
+
+  <div class="bar">
+    <button id="btn-novo-cliente">Novo cliente</button>
+    <button id="btn-importar">Importar clientes</button>
+    <a class="button-link secondary" href="catalogo.html">Acessar catálogo</a>
+    <button class="button-link secondary" type="button" onclick="CrmAuth.logout()">Sair</button>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Nome</th><th>Plano</th><th>Status</th><th>Alterar</th><th>Ações</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="log">
+    <h2>Log de ações</h2>
+    <div id="log"></div>
+  </div>
+</div>
+
+<dialog id="client-dialog" aria-labelledby="client-dialog-title">
+  <div class="dialog-head">
+    <div>
+      <h2 id="client-dialog-title">Novo cliente</h2>
+      <p>Cadastre um cliente na sua base.</p>
+    </div>
+    <button class="close-button" id="btn-fechar-cliente" type="button" aria-label="Fechar">×</button>
+  </div>
+  <form class="client-form" id="client-form">
+    <div class="field">
+      <label for="client-name">Nome</label>
+      <input id="client-name" name="nome" required maxlength="100" autocomplete="name" />
+    </div>
+    <div class="field">
+      <label for="client-plan">Plano</label>
+      <select id="client-plan" name="plano" required>
+        <option value="Básico">Básico</option>
+        <option value="Pro">Pro</option>
+        <option value="Enterprise">Enterprise</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="client-status">Status inicial</label>
+      <select id="client-status" name="status" required>
+        <option value="ativo">Ativo</option>
+        <option value="pendente">Pendente</option>
+        <option value="inadimplente">Inadimplente</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="button-link secondary" id="btn-cancelar-cliente" type="button">Cancelar</button>
+      <button type="submit">Adicionar cliente</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  const CACHE_CLIENTES = "mini-crm-clientes-v1";
+  const criarStatusPadrao = () => ({ valor: "ativo", atualizadoEm: null });
+
+  const STATUS = ["ativo", "pendente", "inadimplente"];
+  const rotulo = { ativo: "Ativo", pendente: "Pendente", inadimplente: "Inadimplente" };
+  const URL_USUARIOS = "https://fakestoreapi.com/users";
+
+  function criarClientesIniciais() {
+    return [
+      { id: 1, nome: "Ana Souza",   plano: "Pro",        status: criarStatusPadrao() },
+      { id: 2, nome: "Bruno Lima",  plano: "Básico",     status: criarStatusPadrao() },
+      { id: 3, nome: "Carla Dias",  plano: "Enterprise", status: criarStatusPadrao() },
+    ];
+  }
+
+  function carregarClientesDoCache() {
+    try {
+      const cache = localStorage.getItem(CACHE_CLIENTES);
+      if (cache === null) return { clientes: criarClientesIniciais(), restaurado: false };
+
+      const dados = JSON.parse(cache);
+      if (!Array.isArray(dados)) throw new Error("Formato de cache inválido");
+
+      const clientesValidos = dados.map((cliente, indice) => {
+        if (!cliente || typeof cliente.nome !== "string" || !cliente.nome.trim()) {
+          throw new Error(`Cliente inválido na posição ${indice}`);
+        }
+
+        const status = STATUS.includes(cliente.status?.valor)
+          ? cliente.status.valor
+          : "ativo";
+        return {
+          id: Number.isFinite(Number(cliente.id)) ? Number(cliente.id) : Date.now() + indice,
+          nome: cliente.nome.trim(),
+          plano: typeof cliente.plano === "string" && cliente.plano ? cliente.plano : "Básico",
+          status: {
+            valor: status,
+            atualizadoEm: cliente.status?.atualizadoEm || null,
+          },
+        };
+      });
+
+      return { clientes: clientesValidos, restaurado: true };
+    } catch (erro) {
+      console.warn("Cache de clientes ignorado:", erro);
+      localStorage.removeItem(CACHE_CLIENTES);
+      return { clientes: criarClientesIniciais(), restaurado: false };
+    }
+  }
+
+  function salvarClientesNoCache() {
+    try {
+      localStorage.setItem(CACHE_CLIENTES, JSON.stringify(clientes));
+      return true;
+    } catch (erro) {
+      console.error("Falha ao salvar clientes no cache:", erro);
+      return false;
+    }
+  }
+
+  const estadoInicial = carregarClientesDoCache();
+  let clientes = estadoInicial.clientes;
+
+  function formatarNome(usuario, indice) {
+    const nomeCompleto = [usuario.name?.firstname, usuario.name?.lastname]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+    const nome = nomeCompleto || usuario.username || usuario.email || `Cliente ${indice + 1}`;
+
+    return nome.replace(/\b\p{L}/gu, letra => letra.toLocaleUpperCase("pt-BR"));
+  }
+
+  function render() {
+    const tbody = document.getElementById("tbody");
+    tbody.replaceChildren();
+
+    for (const c of clientes) {
+      const tr = document.createElement("tr");
+      const icone = c.status.valor === "inadimplente" ? "⚠ " : "";
+
+      const nomeCelula = document.createElement("td");
+      const nome = document.createElement("span");
+      nome.className = "nome";
+      nome.textContent = c.nome;
+      nomeCelula.appendChild(nome);
+
+      const planoCelula = document.createElement("td");
+      planoCelula.textContent = c.plano;
+
+      const statusCelula = document.createElement("td");
+      const badge = document.createElement("span");
+      badge.className = `badge ${c.status.valor}`;
+      badge.textContent = `${icone}${rotulo[c.status.valor]}`;
+      statusCelula.appendChild(badge);
+
+      const alterarCelula = document.createElement("td");
+      const select = document.createElement("select");
+      select.dataset.id = c.id;
+      select.setAttribute("aria-label", `Alterar status de ${c.nome}`);
+      for (const status of STATUS) {
+        const option = document.createElement("option");
+        option.value = status;
+        option.textContent = rotulo[status];
+        option.selected = status === c.status.valor;
+        select.appendChild(option);
+      }
+      alterarCelula.appendChild(select);
+
+      const acoesCelula = document.createElement("td");
+      const excluir = document.createElement("button");
+      excluir.className = "delete-button";
+      excluir.type = "button";
+      excluir.dataset.action = "delete";
+      excluir.dataset.id = c.id;
+      excluir.textContent = "Excluir";
+      excluir.setAttribute("aria-label", `Excluir ${c.nome}`);
+      acoesCelula.appendChild(excluir);
+
+      tr.append(nomeCelula, planoCelula, statusCelula, alterarCelula, acoesCelula);
+      tbody.appendChild(tr);
+    }
+
+    if (clientes.length === 0) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 5;
+      td.textContent = "Nenhum cliente cadastrado.";
+      td.style.textAlign = "center";
+      td.style.color = "var(--muted)";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+  }
+
+  function adicionarCliente({ nome, plano, status }) {
+    const idsNumericos = clientes.map(cliente => Number(cliente.id)).filter(Number.isFinite);
+    const cliente = {
+      id: idsNumericos.length ? Math.max(...idsNumericos) + 1 : 1,
+      nome: nome.trim(),
+      plano,
+      status: { valor: status, atualizadoEm: null },
+    };
+    clientes.push(cliente);
+    salvarClientesNoCache();
+    render();
+    registrarLog(`${cliente.nome} foi adicionado ao plano ${cliente.plano}.`);
+    return cliente;
+  }
+
+  function excluirCliente(id) {
+    const cliente = clientes.find(c => c.id === id);
+    if (!cliente || !window.confirm(`Excluir ${cliente.nome}?`)) return false;
+
+    clientes = clientes.filter(c => c.id !== id);
+    salvarClientesNoCache();
+    render();
+    registrarLog(`${cliente.nome} foi excluído.`, true);
+    return true;
+  }
+
+  function abrirFormularioCliente() {
+    const form = document.getElementById("client-form");
+    form.reset();
+    document.getElementById("client-dialog").showModal();
+    form.elements.nome.focus();
+  }
+
+  function fecharFormularioCliente() {
+    const dialog = document.getElementById("client-dialog");
+    if (dialog.open) dialog.close();
+  }
+
+  function enviarFormularioCliente(evento) {
+    evento.preventDefault();
+    const form = evento.currentTarget;
+    const dados = new FormData(form);
+    const nome = dados.get("nome").trim();
+    if (!nome) {
+      form.elements.nome.setCustomValidity("Informe um nome válido.");
+      form.elements.nome.reportValidity();
+      return;
+    }
+
+    form.elements.nome.setCustomValidity("");
+    adicionarCliente({
+      nome,
+      plano: dados.get("plano"),
+      status: dados.get("status"),
+    });
+    fecharFormularioCliente();
+  }
+
+  function mudarStatus(id, novoValor) {
+    const cliente = clientes.find(c => c.id === id);
+    cliente.status = {
+      valor: novoValor,
+      atualizadoEm: new Date().toLocaleTimeString("pt-BR"),
+    };
+    salvarClientesNoCache();
+
+    if (novoValor === "inadimplente") {
+      registrarLog(`⚠ Ação disparada: ${cliente.nome} ficou INADIMPLENTE (${cliente.status.atualizadoEm})`, true);
+    } else {
+      registrarLog(`${cliente.nome} → ${rotulo[novoValor]} (${cliente.status.atualizadoEm})`);
+    }
+    render();
+  }
+
+  function registrarLog(texto, alerta = false) {
+    const box = document.getElementById("log");
+    const vazio = box.querySelector(".vazio");
+    if (vazio) vazio.remove();
+    const linha = document.createElement("div");
+    linha.className = "linha" + (alerta ? " alerta" : "");
+    linha.textContent = "› " + texto;
+    box.prepend(linha);
+  }
+
+  async function importarClientes() {
+    const botao = document.getElementById("btn-importar");
+    botao.disabled = true;
+    botao.textContent = "Importando...";
+
+    try {
+      const resposta = await fetch(URL_USUARIOS);
+      if (!resposta.ok) {
+        throw new Error(`A API respondeu com o status ${resposta.status}`);
+      }
+
+      const usuarios = await resposta.json();
+      if (!Array.isArray(usuarios) || usuarios.length === 0) {
+        throw new Error("A API não retornou clientes");
+      }
+
+      clientes = usuarios.map((usuario, indice) => ({
+        id: usuario.id ?? indice + 1,
+        nome: formatarNome(usuario, indice),
+        plano: "Básico",
+        status: criarStatusPadrao(),
+      }));
+
+      salvarClientesNoCache();
+      render();
+      registrarLog(`${clientes.length} clientes importados com sucesso.`);
+    } catch (erro) {
+      console.error("Falha ao importar clientes:", erro);
+      registrarLog(`Falha na importação: ${erro.message}`, true);
+    } finally {
+      botao.disabled = false;
+      botao.textContent = "Importar clientes";
+    }
+  }
+
+  document.getElementById("tbody").addEventListener("change", (e) => {
+    if (e.target.matches("select[data-id]")) {
+      mudarStatus(Number(e.target.dataset.id), e.target.value);
+    }
+  });
+  document.getElementById("tbody").addEventListener("click", (e) => {
+    const botao = e.target.closest("[data-action='delete']");
+    if (botao) excluirCliente(Number(botao.dataset.id));
+  });
+  document.getElementById("btn-novo-cliente").addEventListener("click", abrirFormularioCliente);
+  document.getElementById("btn-fechar-cliente").addEventListener("click", fecharFormularioCliente);
+  document.getElementById("btn-cancelar-cliente").addEventListener("click", fecharFormularioCliente);
+  document.getElementById("client-form").addEventListener("submit", enviarFormularioCliente);
+  document.getElementById("client-dialog").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) fecharFormularioCliente();
+  });
+  document.getElementById("btn-importar").addEventListener("click", importarClientes);
+
+  document.getElementById("log").innerHTML = '<span class="vazio">Nenhuma ação ainda.</span>';
+  render();
+  if (estadoInicial.restaurado) {
+    registrarLog(`${clientes.length} clientes restaurados do cache local.`);
+  }
+</script>
+</body>
+</html>
