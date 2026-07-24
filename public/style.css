@@ -1,0 +1,87 @@
+:root {
+  --bg: #f4f6f8;
+}
+
+body {
+  background: var(--bg);
+}
+
+.login-body {
+  background: linear-gradient(135deg, #0d9488 0%, #0a5f59 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  border: none;
+  border-radius: 14px;
+}
+
+.stat-card {
+  border: none;
+  border-radius: 14px;
+  height: 100%;
+}
+
+.stat-card .stat-valor {
+  font-size: 1.9rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.stat-card .stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+
+.stat-card {
+  transition: transform 0.15s ease;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.table-card {
+  border: none;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.navbar-nav .nav-link.active {
+  font-weight: 600;
+  color: #fff !important;
+}
+
+.status-bar {
+  display: flex;
+  height: 28px;
+  gap: 2px;
+  background: transparent;
+}
+.status-bar .segmento {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.status-bar .segmento:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+.status-bar .segmento:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
