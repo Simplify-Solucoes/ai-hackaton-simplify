@@ -47,15 +47,24 @@
     display: flex; gap: .6rem; align-items: center;
     margin-bottom: 1rem; flex-wrap: wrap;
   }
-  button {
+  button, .button-link {
+    display: inline-flex; align-items: center; justify-content: center;
     font: inherit; font-weight: 550; cursor: pointer;
     border: 1px solid var(--accent); background: var(--accent); color: #fff;
     padding: .5rem .9rem; border-radius: var(--radius);
-    transition: background .15s ease;
+    text-decoration: none; transition: background .15s ease;
   }
-  button:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
-  button:focus-visible { outline: 3px solid #99f6e4; outline-offset: 2px; }
+  button:hover, .button-link:hover {
+    background: var(--accent-ink); border-color: var(--accent-ink);
+  }
+  button:focus-visible, .button-link:focus-visible {
+    outline: 3px solid #99f6e4; outline-offset: 2px;
+  }
   button:disabled { cursor: wait; opacity: .7; }
+  .button-link.secondary {
+    color: var(--accent-ink); background: transparent;
+  }
+  .button-link.secondary:hover { color: #fff; background: var(--accent-ink); }
 
   .card {
     background: var(--surface); border: 1px solid var(--line);
@@ -114,6 +123,7 @@
 
   <div class="bar">
     <button id="btn-importar">Importar clientes</button>
+    <a class="button-link secondary" href="catalogo.html">Acessar catálogo</a>
   </div>
 
   <div class="card">
