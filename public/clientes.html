@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clientes — Mini-CRM Lite</title>
+    <script>
+      if (!localStorage.getItem("mcrm_token")) {
+        window.location.replace("login.html");
+      }
+    </script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link href="style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+
+    <main class="container pb-5">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 fw-semibold mb-0">Clientes</h1>
+        <button class="btn btn-primary" id="btn-novo-cliente">
+          + Novo cliente
+        </button>
+      </div>
+
+      <div class="card table-card shadow-sm">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Nome</th>
+                <th>Plano</th>
+                <th>Status</th>
+                <th>Alterar status</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-clientes"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <div class="modal fade" id="modal-cliente" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="form-cliente">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modal-cliente-titulo">
+                Novo cliente
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="input-nome" class="form-label">Nome</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="input-nome"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="input-plano" class="form-label">Plano</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="input-plano"
+                  placeholder="Básico, Pro, Enterprise..."
+                  required
+                />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="shared.js"></script>
+    <script>
+      iniciarPagina("clientes");
+
+      let clientes = [];
+      const modalEl = document.getElementById("modal-cliente");
+      const modal = new bootstrap.Modal(modalEl);
+      let modoEdicao = null;
+
+      const STATUS = ["ativo", "pendente", "inadimplente"];
+      const rotulo = {
+        ativo: "Ativo",
+        pendente: "Pendente",
+        inadimplente: "Inadimplente",
+      };
+      const corBadge = {
+        ativo: "success",
+        pendente: "warning",
+        inadimplente: "danger",
+      };
+
+      function escapeHtml(str) {
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      async function carregar() {
+        try {
+          clientes = await apiJson("/api/clientes");
+          render();
+        } catch (err) {
+          showToast(err.message, "danger");
+        }
+      }
+
+      function render() {
+        const tbody = document.getElementById("tbody-clientes");
+        tbody.innerHTML = "";
+
+        if (clientes.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="5" class="text-center text-muted py-4">Nenhum cliente cadastrado.</td></tr>';
+          return;
+        }
+
+        for (const c of clientes) {
+          const tr = document.createElement("tr");
+          const options = STATUS.map(
+            (s) =>
+              `<option value="${s}" ${s === c.status.valor ? "selected" : ""}>${rotulo[s]}</option>`,
+          ).join("");
+
+          tr.innerHTML = `
+            <td class="fw-semibold">${escapeHtml(c.nome)}</td>
+            <td>${escapeHtml(c.plano)}</td>
+            <td><span class="badge text-bg-${corBadge[c.status.valor]}">${rotulo[c.status.valor]}</span></td>
+            <td><select class="form-select form-select-sm" style="width:auto" data-id="${c.id}">${options}</select></td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-secondary me-1" data-editar="${c.id}">Editar</button>
+              <button class="btn btn-sm btn-outline-danger" data-excluir="${c.id}">Excluir</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        }
+      }
+
+      async function mudarStatus(id, statusValor) {
+        try {
+          const atualizado = await apiJson(`/api/clientes/${id}`, {
+            method: "PUT",
+            body: JSON.stringify({ statusValor }),
+          });
+          const idx = clientes.findIndex((c) => c.id === id);
+          clientes[idx] = atualizado;
+          render();
+          showToast(
+            `${atualizado.nome} agora está ${rotulo[statusValor]}`,
+            statusValor === "inadimplente" ? "danger" : "success",
+          );
+        } catch (err) {
+          showToast(err.message, "danger");
+        }
+      }
+
+      function abrirModalNovo() {
+        modoEdicao = null;
+        document.getElementById("modal-cliente-titulo").textContent =
+          "Novo cliente";
+        document.getElementById("form-cliente").reset();
+        modal.show();
+      }
+
+      function abrirModalEditar(id) {
+        const cliente = clientes.find((c) => c.id === id);
+        modoEdicao = id;
+        document.getElementById("modal-cliente-titulo").textContent =
+          "Editar cliente";
+        document.getElementById("input-nome").value = cliente.nome;
+        document.getElementById("input-plano").value = cliente.plano;
+        modal.show();
+      }
+
+      async function salvarCliente(e) {
+        e.preventDefault();
+        const nome = document.getElementById("input-nome").value.trim();
+        const plano = document.getElementById("input-plano").value.trim();
+        if (!nome || !plano) return;
+
+        try {
+          if (modoEdicao) {
+            const atualizado = await apiJson(`/api/clientes/${modoEdicao}`, {
+              method: "PUT",
+              body: JSON.stringify({ nome, plano }),
+            });
+            const idx = clientes.findIndex((c) => c.id === modoEdicao);
+            clientes[idx] = atualizado;
+            showToast("Cliente atualizado com sucesso");
+          } else {
+            const novo = await apiJson("/api/clientes", {
+              method: "POST",
+              body: JSON.stringify({ nome, plano }),
+            });
+            clientes.push(novo);
+            showToast("Cliente criado com sucesso");
+          }
+          modal.hide();
+          render();
+        } catch (err) {
+          showToast(err.message, "danger");
+        }
+      }
+
+      async function excluirCliente(id) {
+        const cliente = clientes.find((c) => c.id === id);
+        if (!confirm(`Excluir o cliente "${cliente.nome}"?`)) return;
+
+        try {
+          await apiJson(`/api/clientes/${id}`, { method: "DELETE" });
+          clientes = clientes.filter((c) => c.id !== id);
+          render();
+          showToast("Cliente excluído");
+        } catch (err) {
+          showToast(err.message, "danger");
+        }
+      }
+
+      document
+        .getElementById("tbody-clientes")
+        .addEventListener("change", (e) => {
+          if (e.target.matches("select[data-id]")) {
+            mudarStatus(Number(e.target.dataset.id), e.target.value);
+          }
+        });
+
+      document
+        .getElementById("tbody-clientes")
+        .addEventListener("click", (e) => {
+          if (e.target.matches("[data-editar]")) {
+            abrirModalEditar(Number(e.target.dataset.editar));
+          }
+          if (e.target.matches("[data-excluir]")) {
+            excluirCliente(Number(e.target.dataset.excluir));
+          }
+        });
+
+      document
+        .getElementById("btn-novo-cliente")
+        .addEventListener("click", abrirModalNovo);
+      document
+        .getElementById("form-cliente")
+        .addEventListener("submit", salvarCliente);
+
+      carregar();
+    </script>
+  </body>
+</html>
