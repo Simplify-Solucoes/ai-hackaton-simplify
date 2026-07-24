@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Clientes — Mini-CRM Lite</title>
+
+<script>
+  if (!localStorage.getItem("auth")) {
+    window.location.replace("login.html");
+  }
+</script>
+
+<style>
+  :root {
+    --bg:        #f4f6f8;
+    --surface:   #ffffff;
+    --ink:       #1a1d24;
+    --muted:     #6b7280;
+    --line:      #e3e7ec;
+    --accent:    #0d9488;
+    --accent-ink:#0a5f59;
+
+    --inad-bg:   #fde3e3;  --inad-fg:   #c02626;
+    --ativo-bg:  #e7f6ec;  --ativo-fg:  #157347;
+
+    --radius: 10px;
+    --font-ui:   system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-ui);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 230px;
+    background: #1a1d2b;
+    color: #c2c7d0;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+  }
+  .sidebar .brand {
+    display: flex; align-items: center; gap: .6rem;
+    padding: 1rem 1.1rem;
+    color: #fff; font-weight: 650; font-size: 1.05rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+  .sidebar .brand .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--accent);
+    flex-shrink: 0;
+  }
+  .sidebar nav { padding: .75rem .6rem; flex: 1; }
+  .sidebar nav a {
+    display: flex; align-items: center; gap: .7rem;
+    padding: .6rem .8rem; margin-bottom: .15rem;
+    border-radius: 8px; color: #c2c7d0; text-decoration: none;
+    font-size: .9rem; font-weight: 500;
+    transition: background .15s ease, color .15s ease;
+  }
+  .sidebar nav a .ico { width: 1.1rem; text-align: center; opacity: .85; }
+  .sidebar nav a:hover { background: rgba(255,255,255,.06); color: #fff; }
+  .sidebar nav a.ativo { background: var(--accent); color: #fff; }
+  .sidebar nav a.sair { color: #f2a3a3; }
+  .sidebar nav a.sair:hover { background: rgba(220,38,38,.15); color: #ff8a8a; }
+
+  .content { margin-left: 230px; padding: 2rem 1rem; }
+
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  header { margin-bottom: 1.5rem; }
+  header h1 {
+    font-size: 1.35rem; font-weight: 650; letter-spacing: -0.01em; margin: 0;
+  }
+  header p { margin: .25rem 0 0; color: var(--muted); font-size: .9rem; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); overflow: hidden;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .card h2 {
+    font-size: 1rem; font-weight: 650; margin: 0 0 1rem;
+  }
+
+  .grid-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 640px) { .grid-form { grid-template-columns: 1fr; } }
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    display: block; font-size: .82rem; font-weight: 600; color: var(--ink);
+    margin-bottom: .35rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select {
+    width: 100%; font: inherit; font-size: .92rem;
+    padding: .6rem .75rem; border-radius: 8px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px;
+    border-color: var(--accent);
+  }
+
+  .acoes-form {
+    grid-column: 1 / -1;
+    display: flex; gap: .6rem; margin-top: .25rem;
+  }
+
+  button {
+    font: inherit; font-weight: 550; cursor: pointer;
+    border: 1px solid var(--accent); background: var(--accent); color: #fff;
+    padding: .6rem 1rem; border-radius: var(--radius);
+    transition: background .15s ease;
+  }
+  button:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
+  button:focus-visible { outline: 3px solid #99f6e4; outline-offset: 2px; }
+  button.secundario {
+    background: transparent; color: var(--muted); border-color: var(--line);
+  }
+  button.secundario:hover { background: #f4f6f8; color: var(--ink); border-color: var(--line); }
+  button.perigo {
+    background: transparent; color: var(--inad-fg); border-color: var(--inad-fg);
+    padding: .35rem .6rem; font-size: .82rem;
+  }
+  button.perigo:hover { background: var(--inad-bg); }
+  button.editar {
+    background: transparent; color: var(--accent-ink); border-color: var(--accent);
+    padding: .35rem .6rem; font-size: .82rem;
+  }
+  button.editar:hover { background: #e7f6f4; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td {
+    text-align: left; padding: .8rem 1rem; border-bottom: 1px solid var(--line);
+    font-size: .92rem; vertical-align: middle;
+  }
+  th {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); font-weight: 600; background: #fafbfc;
+  }
+  tr:last-child td { border-bottom: none; }
+  td .nome { font-weight: 550; }
+  td .sub { display: block; color: var(--muted); font-size: .8rem; }
+  .col-acoes { display: flex; gap: .4rem; }
+
+  .vazio-tabela {
+    padding: 1.5rem 1rem; text-align: center; color: var(--muted); font-size: .9rem;
+  }
+
+  .toast {
+    display: none;
+    border-radius: 8px; padding: .6rem .8rem;
+    font-size: .85rem; font-weight: 550;
+    margin-bottom: 1rem;
+  }
+  .toast.mostrar { display: block; }
+  .toast.sucesso { background: var(--ativo-bg); color: var(--ativo-fg); }
+  .toast.erro { background: var(--inad-bg); color: var(--inad-fg); }
+
+  .badge-editando {
+    display: inline-block; margin-left: .5rem;
+    background: #fdf1dd; color: #b45309;
+    font-size: .72rem; font-weight: 650;
+    padding: .15rem .5rem; border-radius: 999px;
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span> Hackaton</div>
+  <nav>
+    <a href="index.html"><span class="ico">👥</span> CRM</a>
+    <a href="catalogo.html"><span class="ico">📦</span> Catálogo de produtos</a>
+    <a class="ativo" href="clientes.html"><span class="ico">🗂️</span> Clientes</a>
+    <a class="sair" href="#" id="link-sair"><span class="ico">⏻</span> Sair</a>
+  </nav>
+</aside>
+
+<div class="content">
+<div class="wrap">
+  <header>
+    <h1>Clientes</h1>
+    <p>Cadastro de clientes salvo no localStorage — CRUD via chamadas assíncronas (AJAX).</p>
+  </header>
+
+  <div id="toast" class="toast"></div>
+
+  <div class="card">
+    <h2 id="titulo-form">Novo cliente<span id="badge-editando" class="badge-editando" style="display:none">editando</span></h2>
+    <form id="form-cliente" novalidate>
+      <input type="hidden" id="cliente-id" value="" />
+      <div class="grid-form">
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" placeholder="Nome completo" required />
+        </div>
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" placeholder="voce@empresa.com" required />
+        </div>
+        <div class="field">
+          <label for="telefone">Telefone</label>
+          <input type="tel" id="telefone" placeholder="(00) 00000-0000" />
+        </div>
+        <div class="field">
+          <label for="plano">Plano</label>
+          <select id="plano">
+            <option value="Básico">Básico</option>
+            <option value="Pro">Pro</option>
+            <option value="Enterprise">Enterprise</option>
+          </select>
+        </div>
+        <div class="acoes-form">
+          <button type="submit" id="btn-salvar">Adicionar cliente</button>
+          <button type="button" class="secundario" id="btn-cancelar" style="display:none">Cancelar edição</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="padding:0">
+    <table>
+      <thead>
+        <tr><th>Nome</th><th>Telefone</th><th>Plano</th><th>Ações</th></tr>
+      </thead>
+      <tbody id="tbody-clientes"></tbody>
+    </table>
+    <div id="vazio-tabela" class="vazio-tabela" style="display:none">Nenhum cliente cadastrado ainda.</div>
+  </div>
+</div>
+</div>
+
+<script>
+  const STORAGE_KEY = "clientes";
+  const LATENCIA_MS = 250;
+
+  // Camada de "AJAX" simulada sobre o localStorage — pensada para
+  // ser trocada por chamadas fetch() reais a uma API sem mudar as telas.
+  const api = {
+    listar() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const dados = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+          resolve(dados);
+        }, LATENCIA_MS);
+      });
+    },
+
+    criar(cliente) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (!cliente.nome || !cliente.email) {
+            reject(new Error("Nome e e-mail são obrigatórios."));
+            return;
+          }
+          const dados = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+          const novo = { id: Date.now(), ...cliente };
+          dados.push(novo);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
+          resolve(novo);
+        }, LATENCIA_MS);
+      });
+    },
+
+    atualizar(id, dadosAtualizados) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          const dados = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+          const idx = dados.findIndex((c) => c.id === id);
+          if (idx === -1) {
+            reject(new Error("Cliente não encontrado."));
+            return;
+          }
+          dados[idx] = { ...dados[idx], ...dadosAtualizados };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
+          resolve(dados[idx]);
+        }, LATENCIA_MS);
+      });
+    },
+
+    remover(id) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          const dados = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+          const existe = dados.some((c) => c.id === id);
+          if (!existe) {
+            reject(new Error("Cliente não encontrado."));
+            return;
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(dados.filter((c) => c.id !== id)));
+          resolve(true);
+        }, LATENCIA_MS);
+      });
+    },
+  };
+
+  const form = document.getElementById("form-cliente");
+  const campoId = document.getElementById("cliente-id");
+  const campoNome = document.getElementById("nome");
+  const campoEmail = document.getElementById("email");
+  const campoTelefone = document.getElementById("telefone");
+  const campoPlano = document.getElementById("plano");
+  const btnSalvar = document.getElementById("btn-salvar");
+  const btnCancelar = document.getElementById("btn-cancelar");
+  const tituloForm = document.getElementById("titulo-form");
+  const badgeEditando = document.getElementById("badge-editando");
+  const tbody = document.getElementById("tbody-clientes");
+  const vazioTabela = document.getElementById("vazio-tabela");
+  const toast = document.getElementById("toast");
+
+  function mostrarToast(texto, tipo = "sucesso") {
+    toast.textContent = texto;
+    toast.className = `toast mostrar ${tipo}`;
+    clearTimeout(mostrarToast._t);
+    mostrarToast._t = setTimeout(() => toast.classList.remove("mostrar"), 2500);
+  }
+
+  function escapar(texto) {
+    const div = document.createElement("div");
+    div.textContent = texto ?? "";
+    return div.innerHTML;
+  }
+
+  function entrarModoEdicao(cliente) {
+    campoId.value = cliente.id;
+    campoNome.value = cliente.nome;
+    campoEmail.value = cliente.email;
+    campoTelefone.value = cliente.telefone || "";
+    campoPlano.value = cliente.plano;
+    tituloForm.firstChild.textContent = "Editar cliente";
+    badgeEditando.style.display = "inline-block";
+    btnSalvar.textContent = "Salvar alterações";
+    btnCancelar.style.display = "inline-block";
+    campoNome.focus();
+  }
+
+  function sairModoEdicao() {
+    form.reset();
+    campoId.value = "";
+    tituloForm.firstChild.textContent = "Novo cliente";
+    badgeEditando.style.display = "none";
+    btnSalvar.textContent = "Adicionar cliente";
+    btnCancelar.style.display = "none";
+  }
+
+  function renderLinha(cliente) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="nome">${escapar(cliente.nome)}</span><span class="sub">${escapar(cliente.email)}</span></td>
+      <td>${escapar(cliente.telefone) || "—"}</td>
+      <td>${escapar(cliente.plano)}</td>
+      <td>
+        <div class="col-acoes">
+          <button type="button" class="editar" data-id="${cliente.id}">Editar</button>
+          <button type="button" class="perigo" data-id="${cliente.id}">Excluir</button>
+        </div>
+      </td>
+    `;
+    return tr;
+  }
+
+  async function carregarClientes() {
+    const clientes = await api.listar();
+    tbody.innerHTML = "";
+    vazioTabela.style.display = clientes.length ? "none" : "block";
+    clientes.forEach((c) => tbody.appendChild(renderLinha(c)));
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const dados = {
+      nome: campoNome.value.trim(),
+      email: campoEmail.value.trim(),
+      telefone: campoTelefone.value.trim(),
+      plano: campoPlano.value,
+    };
+
+    const idEmEdicao = campoId.value ? Number(campoId.value) : null;
+    btnSalvar.disabled = true;
+
+    try {
+      if (idEmEdicao) {
+        await api.atualizar(idEmEdicao, dados);
+        mostrarToast(`Cliente "${dados.nome}" atualizado com sucesso.`);
+      } else {
+        await api.criar(dados);
+        mostrarToast(`Cliente "${dados.nome}" adicionado com sucesso.`);
+      }
+      sairModoEdicao();
+      await carregarClientes();
+    } catch (err) {
+      mostrarToast(err.message, "erro");
+    } finally {
+      btnSalvar.disabled = false;
+    }
+  });
+
+  btnCancelar.addEventListener("click", sairModoEdicao);
+
+  tbody.addEventListener("click", async (e) => {
+    const alvo = e.target;
+    if (!alvo.matches("button[data-id]")) return;
+    const id = Number(alvo.dataset.id);
+
+    if (alvo.classList.contains("editar")) {
+      const clientes = await api.listar();
+      const cliente = clientes.find((c) => c.id === id);
+      if (cliente) entrarModoEdicao(cliente);
+      return;
+    }
+
+    if (alvo.classList.contains("perigo")) {
+      if (!confirm("Excluir este cliente?")) return;
+      try {
+        await api.remover(id);
+        mostrarToast("Cliente excluído com sucesso.");
+        if (Number(campoId.value) === id) sairModoEdicao();
+        await carregarClientes();
+      } catch (err) {
+        mostrarToast(err.message, "erro");
+      }
+    }
+  });
+
+  document.getElementById("link-sair").addEventListener("click", (e) => {
+    e.preventDefault();
+    localStorage.removeItem("auth");
+    window.location.href = "login.html";
+  });
+
+  carregarClientes();
+</script>
+</body>
+</html>

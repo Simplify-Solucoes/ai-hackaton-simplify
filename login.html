@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Entrar — Mini-CRM Lite</title>
+
+<style>
+  :root {
+    --bg:        #f4f6f8;
+    --surface:   #ffffff;
+    --ink:       #1a1d24;
+    --muted:     #6b7280;
+    --line:      #e3e7ec;
+    --accent:    #0d9488;
+    --accent-ink:#0a5f59;
+
+    --inad-bg:   #fde3e3;  --inad-fg:   #c02626;
+
+    --radius: 10px;
+    --font-ui:   system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-ui);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .login-wrap { width: 100%; max-width: 380px; }
+
+  .brand {
+    display: flex; align-items: center; justify-content: center; gap: .6rem;
+    margin-bottom: 1.25rem;
+    color: var(--ink); font-weight: 650; font-size: 1.1rem;
+  }
+  .brand .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); overflow: hidden;
+    padding: 1.75rem;
+  }
+
+  .card h1 {
+    font-size: 1.2rem; font-weight: 650; letter-spacing: -0.01em; margin: 0 0 .25rem;
+  }
+  .card p.sub { margin: 0 0 1.5rem; color: var(--muted); font-size: .88rem; }
+
+  label {
+    display: block; font-size: .82rem; font-weight: 600; color: var(--ink);
+    margin-bottom: .35rem;
+  }
+
+  .field { margin-bottom: 1rem; }
+
+  input[type="email"],
+  input[type="password"] {
+    width: 100%; font: inherit; font-size: .92rem;
+    padding: .6rem .75rem; border-radius: 8px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  input[type="email"]:focus-visible,
+  input[type="password"]:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px;
+    border-color: var(--accent);
+  }
+
+  .row-between {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem; font-size: .85rem;
+  }
+  .row-between label.remember {
+    display: flex; align-items: center; gap: .4rem;
+    font-weight: 500; color: var(--muted); margin: 0;
+  }
+  .row-between input[type="checkbox"] { accent-color: var(--accent); }
+  .row-between a { color: var(--accent); text-decoration: none; font-weight: 550; }
+  .row-between a:hover { color: var(--accent-ink); text-decoration: underline; }
+
+  button {
+    width: 100%;
+    font: inherit; font-weight: 550; cursor: pointer;
+    border: 1px solid var(--accent); background: var(--accent); color: #fff;
+    padding: .65rem .9rem; border-radius: var(--radius);
+    transition: background .15s ease;
+  }
+  button:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
+  button:focus-visible { outline: 3px solid #99f6e4; outline-offset: 2px; }
+
+  .erro {
+    display: none;
+    background: var(--inad-bg); color: var(--inad-fg);
+    border-radius: 8px; padding: .6rem .8rem;
+    font-size: .85rem; font-weight: 550;
+    margin-bottom: 1rem;
+  }
+  .erro.mostrar { display: block; }
+
+  .rodape {
+    text-align: center; margin-top: 1.1rem; color: var(--muted); font-size: .85rem;
+  }
+  .rodape a { color: var(--accent); text-decoration: none; font-weight: 550; }
+  .rodape a:hover { color: var(--accent-ink); text-decoration: underline; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="brand"><span class="dot"></span> Hackaton</div>
+
+  <div class="card">
+    <h1>Entrar</h1>
+    <p class="sub">Acesse o Mini-CRM Lite com seu e-mail e senha.</p>
+
+    <div class="erro" id="erro">E-mail ou senha inválidos.</div>
+
+    <form id="form-login" novalidate>
+      <div class="field">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" placeholder="voce@empresa.com" required autocomplete="username" />
+      </div>
+
+      <div class="field">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" placeholder="••••••••" required autocomplete="current-password" />
+      </div>
+
+      <div class="row-between">
+        <label class="remember"><input type="checkbox" id="lembrar" /> Lembrar-me</label>
+        <a href="#">Esqueceu a senha?</a>
+      </div>
+
+      <button type="submit">Entrar</button>
+    </form>
+  </div>
+
+  <p class="rodape">Não tem conta? <a href="#">Fale com o administrador</a></p>
+</div>
+
+<script>
+  const CREDENCIAIS = { email: "admin@admin.com.br", senha: "123456" };
+
+  document.getElementById("form-login").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const senha = document.getElementById("senha").value;
+    const erro = document.getElementById("erro");
+
+    if (!email || !senha) {
+      erro.textContent = "Preencha e-mail e senha.";
+      erro.classList.add("mostrar");
+      return;
+    }
+
+    if (email.toLowerCase() !== CREDENCIAIS.email || senha !== CREDENCIAIS.senha) {
+      erro.textContent = "E-mail ou senha inválidos.";
+      erro.classList.add("mostrar");
+      return;
+    }
+
+    erro.classList.remove("mostrar");
+    localStorage.setItem("auth", JSON.stringify({ email, logadoEm: Date.now() }));
+    window.location.href = "index.html";
+  });
+</script>
+</body>
+</html>

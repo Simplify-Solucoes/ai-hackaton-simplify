@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Catálogo de Produtos — Starter</title>
+
+<script>
+  if (!localStorage.getItem("auth")) {
+    window.location.replace("login.html");
+  }
+</script>
+
+<style>
+  :root {
+    --bg:        #f4f6f8;
+    --surface:   #ffffff;
+    --ink:       #1a1d24;
+    --muted:     #6b7280;
+    --line:      #e3e7ec;
+    --accent:    #0d9488;
+    --accent-ink:#0a5f59;
+
+    --radius: 10px;
+    --font-ui:   system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-ui);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 230px;
+    background: #1a1d2b;
+    color: #c2c7d0;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+  }
+  .sidebar .brand {
+    display: flex; align-items: center; gap: .6rem;
+    padding: 1rem 1.1rem;
+    color: #fff; font-weight: 650; font-size: 1.05rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+  .sidebar .brand .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--accent);
+    flex-shrink: 0;
+  }
+  .sidebar nav { padding: .75rem .6rem; flex: 1; }
+  .sidebar nav a {
+    display: flex; align-items: center; gap: .7rem;
+    padding: .6rem .8rem; margin-bottom: .15rem;
+    border-radius: 8px; color: #c2c7d0; text-decoration: none;
+    font-size: .9rem; font-weight: 500;
+    transition: background .15s ease, color .15s ease;
+  }
+  .sidebar nav a .ico { width: 1.1rem; text-align: center; opacity: .85; }
+  .sidebar nav a:hover { background: rgba(255,255,255,.06); color: #fff; }
+  .sidebar nav a.ativo { background: var(--accent); color: #fff; }
+  .sidebar nav a.sair { color: #f2a3a3; }
+  .sidebar nav a.sair:hover { background: rgba(220,38,38,.15); color: #ff8a8a; }
+
+  .content { margin-left: 230px; padding: 2rem 1rem; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; }
+
+  header { margin-bottom: 1.5rem; }
+  header h1 {
+    font-size: 1.35rem; font-weight: 650; letter-spacing: -0.01em; margin: 0;
+  }
+  header p { margin: .25rem 0 0; color: var(--muted); font-size: .9rem; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); overflow: hidden;
+    padding: 2rem; text-align: center; color: var(--muted);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.1rem;
+  }
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+
+  .produto {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .produto .imgwrap {
+    height: 160px; display: flex; align-items: center; justify-content: center;
+    padding: 1rem; background: #fff;
+  }
+  .produto .imgwrap img {
+    max-width: 100%; max-height: 100%; object-fit: contain;
+  }
+  .produto .info {
+    padding: .9rem 1rem 1.1rem; border-top: 1px solid var(--line);
+    flex: 1; display: flex; flex-direction: column; gap: .35rem;
+  }
+  .produto .categoria {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--accent-ink); font-weight: 650;
+  }
+  .produto .titulo {
+    font-size: .92rem; font-weight: 600; margin: 0;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .produto .preco {
+    margin-top: auto; font-size: 1.05rem; font-weight: 700; color: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span> Hackaton</div>
+  <nav>
+    <a href="index.html"><span class="ico">👥</span> CRM</a>
+    <a class="ativo" href="catalogo.html"><span class="ico">📦</span> Catálogo de produtos</a>
+    <a href="clientes.html"><span class="ico">🗂️</span> Clientes</a>
+    <a class="sair" href="#" id="link-sair"><span class="ico">⏻</span> Sair</a>
+  </nav>
+</aside>
+
+<div class="content">
+<div class="wrap">
+  <header>
+    <h1>Catálogo de Produtos</h1>
+    <p>Em construção — starter do hackathon.</p>
+  </header>
+
+  <div id="produtos" class="grid">
+    <div class="card">Carregando produtos...</div>
+  </div>
+</div>
+</div>
+
+<script>
+  document.getElementById("link-sair").addEventListener("click", (e) => {
+    e.preventDefault();
+    localStorage.removeItem("auth");
+    window.location.href = "login.html";
+  });
+
+  fetch('https://fakestoreapi.com/products')
+    .then(response => response.json())
+    .then(data => {
+      const container = document.getElementById('produtos');
+      container.innerHTML = '';
+
+      data.forEach(produto => {
+        const card = document.createElement('div');
+        card.className = 'produto';
+        card.innerHTML = `
+          <div class="imgwrap"><img src="${produto.image}" alt="${produto.title}"></div>
+          <div class="info">
+            <span class="categoria">${produto.category}</span>
+            <p class="titulo">${produto.title}</p>
+            <span class="preco">$${produto.price}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    })
+    .catch(error => {
+      document.getElementById('produtos').innerHTML =
+        '<div class="card">Erro ao carregar produtos: ' + error.message + '</div>';
+    });
+</script>
+</body>
+</html>

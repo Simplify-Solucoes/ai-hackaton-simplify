@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Mini-CRM Lite — Starter</title>
 
+<script>
+  if (!localStorage.getItem("auth")) {
+    window.location.replace("login.html");
+  }
+</script>
+
 <style>
   :root {
     --bg:        #f4f6f8;
@@ -32,8 +38,43 @@
     color: var(--ink);
     background: var(--bg);
     line-height: 1.5;
-    padding: 2rem 1rem;
   }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 230px;
+    background: #1a1d2b;
+    color: #c2c7d0;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+  }
+  .sidebar .brand {
+    display: flex; align-items: center; gap: .6rem;
+    padding: 1rem 1.1rem;
+    color: #fff; font-weight: 650; font-size: 1.05rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+  .sidebar .brand .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--accent);
+    flex-shrink: 0;
+  }
+  .sidebar nav { padding: .75rem .6rem; flex: 1; }
+  .sidebar nav a {
+    display: flex; align-items: center; gap: .7rem;
+    padding: .6rem .8rem; margin-bottom: .15rem;
+    border-radius: 8px; color: #c2c7d0; text-decoration: none;
+    font-size: .9rem; font-weight: 500;
+    transition: background .15s ease, color .15s ease;
+  }
+  .sidebar nav a .ico { width: 1.1rem; text-align: center; opacity: .85; }
+  .sidebar nav a:hover { background: rgba(255,255,255,.06); color: #fff; }
+  .sidebar nav a.ativo { background: var(--accent); color: #fff; }
+  .sidebar nav a.sair { color: #f2a3a3; }
+  .sidebar nav a.sair:hover { background: rgba(220,38,38,.15); color: #ff8a8a; }
+
+  .content { margin-left: 230px; padding: 2rem 1rem; }
 
   .wrap { max-width: 760px; margin: 0 auto; }
 
@@ -105,6 +146,17 @@
 </style>
 </head>
 <body>
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span> Hackaton</div>
+  <nav>
+    <a class="ativo" href="index.html"><span class="ico">👥</span> CRM</a>
+    <a href="catalogo.html"><span class="ico">📦</span> Catálogo de produtos</a>
+    <a href="clientes.html"><span class="ico">🗂️</span> Clientes</a>
+    <a class="sair" href="#" id="link-sair"><span class="ico">⏻</span> Sair</a>
+  </nav>
+</aside>
+
+<div class="content">
 <div class="wrap">
   <header>
     <h1>Mini-CRM Lite</h1>
@@ -129,14 +181,17 @@
     <div id="log"></div>
   </div>
 </div>
+</div>
 
 <script>
-  const statusPadrao = { valor: "ativo", atualizadoEm: null };
+  function statusPadrao() {
+    return { valor: "ativo", atualizadoEm: null };
+  }
 
   let clientes = [
-    { id: 1, nome: "Ana Souza",   plano: "Pro",        status: statusPadrao },
-    { id: 2, nome: "Bruno Lima",  plano: "Básico",     status: statusPadrao },
-    { id: 3, nome: "Carla Dias",  plano: "Enterprise", status: statusPadrao },
+    { id: 1, nome: "Ana Souza",   plano: "Pro",        status: statusPadrao() },
+    { id: 2, nome: "Bruno Lima",  plano: "Básico",     status: statusPadrao() },
+    { id: 3, nome: "Carla Dias",  plano: "Enterprise", status: statusPadrao() },
   ];
 
   const STATUS = ["ativo", "pendente", "inadimplente"];
@@ -191,6 +246,12 @@
     registrarLog("TODO: integrar com https://fakestoreapi.com/users");
     alert("Integração pendente — este é um dos desafios! Veja o TODO em importarClientes().");
   }
+
+  document.getElementById("link-sair").addEventListener("click", (e) => {
+    e.preventDefault();
+    localStorage.removeItem("auth");
+    window.location.href = "login.html";
+  });
 
   document.getElementById("tbody").addEventListener("change", (e) => {
     if (e.target.matches("select[data-id]")) {
