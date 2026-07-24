@@ -163,7 +163,7 @@
 <div class="wrap">
   <header>
     <h1>Mini-CRM Lite</h1>
-    <p>Gestão de clientes em memória — starter do hackathon.</p>
+    <p>Gestão de clientes com persistência local — starter do hackathon.</p>
   </header>
 
   <div class="bar">
@@ -224,17 +224,68 @@
 </dialog>
 
 <script>
+  const CACHE_CLIENTES = "mini-crm-clientes-v1";
   const criarStatusPadrao = () => ({ valor: "ativo", atualizadoEm: null });
-
-  let clientes = [
-    { id: 1, nome: "Ana Souza",   plano: "Pro",        status: criarStatusPadrao() },
-    { id: 2, nome: "Bruno Lima",  plano: "Básico",     status: criarStatusPadrao() },
-    { id: 3, nome: "Carla Dias",  plano: "Enterprise", status: criarStatusPadrao() },
-  ];
 
   const STATUS = ["ativo", "pendente", "inadimplente"];
   const rotulo = { ativo: "Ativo", pendente: "Pendente", inadimplente: "Inadimplente" };
   const URL_USUARIOS = "https://fakestoreapi.com/users";
+
+  function criarClientesIniciais() {
+    return [
+      { id: 1, nome: "Ana Souza",   plano: "Pro",        status: criarStatusPadrao() },
+      { id: 2, nome: "Bruno Lima",  plano: "Básico",     status: criarStatusPadrao() },
+      { id: 3, nome: "Carla Dias",  plano: "Enterprise", status: criarStatusPadrao() },
+    ];
+  }
+
+  function carregarClientesDoCache() {
+    try {
+      const cache = localStorage.getItem(CACHE_CLIENTES);
+      if (cache === null) return { clientes: criarClientesIniciais(), restaurado: false };
+
+      const dados = JSON.parse(cache);
+      if (!Array.isArray(dados)) throw new Error("Formato de cache inválido");
+
+      const clientesValidos = dados.map((cliente, indice) => {
+        if (!cliente || typeof cliente.nome !== "string" || !cliente.nome.trim()) {
+          throw new Error(`Cliente inválido na posição ${indice}`);
+        }
+
+        const status = STATUS.includes(cliente.status?.valor)
+          ? cliente.status.valor
+          : "ativo";
+        return {
+          id: Number.isFinite(Number(cliente.id)) ? Number(cliente.id) : Date.now() + indice,
+          nome: cliente.nome.trim(),
+          plano: typeof cliente.plano === "string" && cliente.plano ? cliente.plano : "Básico",
+          status: {
+            valor: status,
+            atualizadoEm: cliente.status?.atualizadoEm || null,
+          },
+        };
+      });
+
+      return { clientes: clientesValidos, restaurado: true };
+    } catch (erro) {
+      console.warn("Cache de clientes ignorado:", erro);
+      localStorage.removeItem(CACHE_CLIENTES);
+      return { clientes: criarClientesIniciais(), restaurado: false };
+    }
+  }
+
+  function salvarClientesNoCache() {
+    try {
+      localStorage.setItem(CACHE_CLIENTES, JSON.stringify(clientes));
+      return true;
+    } catch (erro) {
+      console.error("Falha ao salvar clientes no cache:", erro);
+      return false;
+    }
+  }
+
+  const estadoInicial = carregarClientesDoCache();
+  let clientes = estadoInicial.clientes;
 
   function formatarNome(usuario, indice) {
     const nomeCompleto = [usuario.name?.firstname, usuario.name?.lastname]
@@ -309,13 +360,15 @@
   }
 
   function adicionarCliente({ nome, plano, status }) {
+    const idsNumericos = clientes.map(cliente => Number(cliente.id)).filter(Number.isFinite);
     const cliente = {
-      id: Date.now(),
+      id: idsNumericos.length ? Math.max(...idsNumericos) + 1 : 1,
       nome: nome.trim(),
       plano,
       status: { valor: status, atualizadoEm: null },
     };
     clientes.push(cliente);
+    salvarClientesNoCache();
     render();
     registrarLog(`${cliente.nome} foi adicionado ao plano ${cliente.plano}.`);
     return cliente;
@@ -326,6 +379,7 @@
     if (!cliente || !window.confirm(`Excluir ${cliente.nome}?`)) return false;
 
     clientes = clientes.filter(c => c.id !== id);
+    salvarClientesNoCache();
     render();
     registrarLog(`${cliente.nome} foi excluído.`, true);
     return true;
@@ -369,6 +423,7 @@
       valor: novoValor,
       atualizadoEm: new Date().toLocaleTimeString("pt-BR"),
     };
+    salvarClientesNoCache();
 
     if (novoValor === "inadimplente") {
       registrarLog(`⚠ Ação disparada: ${cliente.nome} ficou INADIMPLENTE (${cliente.status.atualizadoEm})`, true);
@@ -411,6 +466,7 @@
         status: criarStatusPadrao(),
       }));
 
+      salvarClientesNoCache();
       render();
       registrarLog(`${clientes.length} clientes importados com sucesso.`);
     } catch (erro) {
@@ -442,6 +498,9 @@
 
   document.getElementById("log").innerHTML = '<span class="vazio">Nenhuma ação ainda.</span>';
   render();
+  if (estadoInicial.restaurado) {
+    registrarLog(`${clientes.length} clientes restaurados do cache local.`);
+  }
 </script>
 </body>
 </html>
