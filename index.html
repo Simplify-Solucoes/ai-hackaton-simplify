@@ -3,144 +3,273 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mini-CRM Lite — Starter</title>
-
+<title>Mini-CRM Lite</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: { DEFAULT: '#0d9488', dark: '#0a5f59' }
+        }
+      }
+    }
+  };
+</script>
 <style>
-  :root {
-    --bg:        #f4f6f8;
-    --surface:   #ffffff;
-    --ink:       #1a1d24;
-    --muted:     #6b7280;
-    --line:      #e3e7ec;
-    --accent:    #0d9488;
-    --accent-ink:#0a5f59;
-
-    --ativo-bg:  #e7f6ec;  --ativo-fg:  #157347;
-    --pend-bg:   #fdf1dd;  --pend-fg:   #b45309;
-    --inad-bg:   #fde3e3;  --inad-fg:   #c02626;
-
-    --radius: 10px;
-    --font-ui:   system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    font-family: var(--font-ui);
-    color: var(--ink);
-    background: var(--bg);
-    line-height: 1.5;
-    padding: 2rem 1rem;
-  }
-
-  .wrap { max-width: 760px; margin: 0 auto; }
-
-  header { margin-bottom: 1.5rem; }
-  header h1 {
-    font-size: 1.35rem; font-weight: 650; letter-spacing: -0.01em; margin: 0;
-  }
-  header p { margin: .25rem 0 0; color: var(--muted); font-size: .9rem; }
-
-  .bar {
-    display: flex; gap: .6rem; align-items: center;
-    margin-bottom: 1rem; flex-wrap: wrap;
-  }
-  button {
-    font: inherit; font-weight: 550; cursor: pointer;
-    border: 1px solid var(--accent); background: var(--accent); color: #fff;
-    padding: .5rem .9rem; border-radius: var(--radius);
-    transition: background .15s ease;
-  }
-  button:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
-  button:focus-visible { outline: 3px solid #99f6e4; outline-offset: 2px; }
-
-  .card {
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: var(--radius); overflow: hidden;
-  }
-
-  table { width: 100%; border-collapse: collapse; }
-  th, td {
-    text-align: left; padding: .8rem 1rem; border-bottom: 1px solid var(--line);
-    font-size: .92rem; vertical-align: middle;
-  }
-  th {
-    font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
-    color: var(--muted); font-weight: 600; background: #fafbfc;
-  }
-  tr:last-child td { border-bottom: none; }
-  td .nome { font-weight: 550; }
-
-  .badge {
-    display: inline-flex; align-items: center; gap: .35rem;
-    padding: .2rem .6rem; border-radius: 999px;
-    font-size: .78rem; font-weight: 600;
-  }
-  .badge.ativo        { background: var(--ativo-bg); color: var(--ativo-fg); }
-  .badge.pendente     { background: var(--pend-bg);  color: var(--pend-fg); }
-  .badge.inadimplente { background: var(--inad-bg);  color: var(--inad-fg); }
-
-  select {
-    font: inherit; padding: .35rem .5rem; border-radius: 8px;
-    border: 1px solid var(--line); background: #fff; color: var(--ink);
-  }
-  select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-
-  .log {
-    margin-top: 1.25rem; background: #12151c; color: #cfd6e0;
-    border-radius: var(--radius); padding: .9rem 1rem;
-    font-family: var(--font-mono); font-size: .82rem; min-height: 3rem;
-  }
-  .log h2 {
-    font-family: var(--font-ui); font-size: .72rem; text-transform: uppercase;
-    letter-spacing: .06em; color: #8b94a3; margin: 0 0 .5rem; font-weight: 600;
-  }
-  .log .linha { white-space: pre-wrap; }
-  .log .linha.alerta { color: #ff8a8a; }
-  .log .vazio { color: #5b6472; }
-
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  html.sessao-ativa #login-screen { display: none !important; }
+  html.sessao-ativa #app { display: block !important; }
 </style>
+<script>
+  (function () {
+    try {
+      var raw = localStorage.getItem("mini-crm-session") || sessionStorage.getItem("mini-crm-session");
+      if (raw && JSON.parse(raw).usuario) {
+        document.documentElement.classList.add("sessao-ativa");
+      }
+    } catch (_) {}
+  })();
+</script>
 </head>
-<body>
-<div class="wrap">
-  <header>
-    <h1>Mini-CRM Lite</h1>
-    <p>Gestão de clientes em memória — starter do hackathon.</p>
-  </header>
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans antialiased">
 
-  <div class="bar">
-    <button id="btn-importar">Importar clientes</button>
+<!-- Fase 5: Login Mock -->
+<div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-sm bg-white rounded-xl shadow-lg border border-slate-200 p-8">
+    <div class="text-center mb-8">
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Mini-CRM Lite</h1>
+      <p class="text-slate-500 text-sm mt-1">Faça login para continuar</p>
+    </div>
+    <form id="login-form" class="space-y-4">
+      <div>
+        <label for="login-user" class="block text-sm font-medium text-slate-700 mb-1">Usuário</label>
+        <input id="login-user" type="text" required placeholder="seu.usuario"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand" />
+      </div>
+      <div>
+        <label for="login-pass" class="block text-sm font-medium text-slate-700 mb-1">Senha</label>
+        <input id="login-pass" type="password" required placeholder="••••••••"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand" />
+      </div>
+      <button type="submit"
+        class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-2.5 px-4 rounded-lg transition-colors">
+        Entrar
+      </button>
+    </form>
   </div>
+</div>
 
-  <div class="card">
-    <table>
-      <thead>
-        <tr><th>Nome</th><th>Plano</th><th>Status</th><th>Alterar</th></tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
+<!-- App principal -->
+<div id="app" class="hidden">
+  <div class="flex min-h-screen">
 
-  <div class="log">
-    <h2>Log de ações</h2>
-    <div id="log"></div>
+    <!-- Navegação lateral -->
+    <aside class="w-56 bg-slate-900 text-white flex flex-col shrink-0">
+      <div class="p-5 border-b border-slate-700">
+        <h1 class="text-lg font-bold tracking-tight">Mini-CRM Lite</h1>
+        <p id="usuario-logado" class="text-slate-400 text-xs mt-0.5 hidden"></p>
+        <p class="text-slate-500 text-xs mt-0.5">Gestão de clientes</p>
+      </div>
+      <nav class="flex-1 p-3 space-y-1">
+        <button data-tab="dashboard"
+          class="tab-btn w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors">
+          Dashboard
+        </button>
+        <button data-tab="crm"
+          class="tab-btn w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors">
+          CRM (Clientes)
+        </button>
+        <button data-tab="catalogo"
+          class="tab-btn w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors">
+          Catálogo
+        </button>
+      </nav>
+      <div class="p-4 border-t border-slate-700">
+        <button id="btn-logout"
+          class="w-full text-left text-slate-400 hover:text-white text-sm transition-colors">
+          Sair
+        </button>
+      </div>
+    </aside>
+
+    <!-- Conteúdo -->
+    <main class="flex-1 p-6 lg:p-8 overflow-auto">
+
+      <!-- Dashboard -->
+      <section id="panel-dashboard" class="tab-panel hidden">
+        <h2 class="text-xl font-bold text-slate-900 mb-6">Dashboard</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total de Clientes</p>
+            <p id="stat-total" class="text-3xl font-bold text-slate-900 mt-1">0</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Ativos</p>
+            <p id="stat-ativos" class="text-3xl font-bold text-emerald-600 mt-1">0</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Inadimplentes</p>
+            <p id="stat-inadimplentes" class="text-3xl font-bold text-red-600 mt-1">0</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm max-w-md">
+          <h3 class="text-sm font-semibold text-slate-700 mb-4">Distribuição por Status</h3>
+          <div class="relative h-64">
+            <canvas id="chart-status"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- CRM -->
+      <section id="panel-crm" class="tab-panel hidden">
+        <h2 class="text-xl font-bold text-slate-900 mb-6">CRM — Clientes</h2>
+
+        <!-- Formulário adicionar cliente -->
+        <form id="form-cliente" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm mb-6 flex flex-wrap gap-4 items-end">
+          <div class="flex-1 min-w-[160px]">
+            <label for="input-nome" class="block text-sm font-medium text-slate-700 mb-1">Nome</label>
+            <input id="input-nome" type="text" required placeholder="Nome do cliente"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand" />
+          </div>
+          <div class="flex-1 min-w-[120px]">
+            <label for="input-plano" class="block text-sm font-medium text-slate-700 mb-1">Plano</label>
+            <input id="input-plano" type="text" required placeholder="Pro, Básico…"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand" />
+          </div>
+          <button type="submit"
+            class="bg-brand hover:bg-brand-dark text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm">
+            Adicionar
+          </button>
+        </form>
+
+        <div class="flex gap-3 mb-4">
+          <button id="btn-importar"
+            class="bg-white hover:bg-slate-50 text-slate-700 font-medium py-2 px-4 rounded-lg border border-slate-300 text-sm transition-colors">
+            Importar clientes
+          </button>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200">
+                  <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Nome</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Plano</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Alterar</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 w-16"></th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="mt-6 bg-slate-900 text-slate-300 rounded-xl p-4 font-mono text-sm min-h-[4rem]">
+          <h3 class="font-sans text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Log de ações</h3>
+          <div id="log"></div>
+        </div>
+      </section>
+
+      <!-- Catálogo -->
+      <section id="panel-catalogo" class="tab-panel hidden">
+        <h2 class="text-xl font-bold text-slate-900 mb-6">Catálogo de Produtos</h2>
+        <div id="catalogo-loading" class="text-slate-500 text-sm">Carregando produtos…</div>
+        <div id="catalogo-erro" class="hidden text-red-600 text-sm mb-4"></div>
+        <div id="catalogo-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+      </section>
+
+    </main>
   </div>
 </div>
 
 <script>
-  const statusPadrao = { valor: "ativo", atualizadoEm: null };
+  const STORAGE_KEY = "mini-crm-clientes";
+  const SESSION_KEY = "mini-crm-session";
 
-  let clientes = [
-    { id: 1, nome: "Ana Souza",   plano: "Pro",        status: statusPadrao },
-    { id: 2, nome: "Bruno Lima",  plano: "Básico",     status: statusPadrao },
-    { id: 3, nome: "Carla Dias",  plano: "Enterprise", status: statusPadrao },
-  ];
+  function storageGet(chave) {
+    try { return localStorage.getItem(chave); }
+    catch (_) { return sessionStorage.getItem(chave); }
+  }
 
+  function storageSet(chave, valor) {
+    try {
+      localStorage.setItem(chave, valor);
+      sessionStorage.setItem(chave, valor);
+      return true;
+    } catch (_) {
+      try {
+        sessionStorage.setItem(chave, valor);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+  }
+
+  function storageRemove(chave) {
+    try { localStorage.removeItem(chave); } catch (_) {}
+    try { sessionStorage.removeItem(chave); } catch (_) {}
+  }
+
+  function estaLogado() {
+    const sessao = carregarSessao();
+    return Boolean(sessao?.usuario);
+  }
   const STATUS = ["ativo", "pendente", "inadimplente"];
   const rotulo = { ativo: "Ativo", pendente: "Pendente", inadimplente: "Inadimplente" };
+
+  const BADGE_CLASSES = {
+    ativo:        "bg-emerald-100 text-emerald-700",
+    pendente:     "bg-amber-100 text-amber-700",
+    inadimplente: "bg-red-100 text-red-700",
+  };
+
+  const CLIENTES_INICIAIS = [
+    { id: 1, nome: "Ana Souza",   plano: "Pro",        status: { valor: "ativo", atualizadoEm: null } },
+    { id: 2, nome: "Bruno Lima",  plano: "Básico",     status: { valor: "ativo", atualizadoEm: null } },
+    { id: 3, nome: "Carla Dias",  plano: "Enterprise", status: { valor: "ativo", atualizadoEm: null } },
+  ];
+
+  let clientes = [];
+  let proximoId = 1;
+  let chartStatus = null;
+  let catalogoCarregado = false;
+  let abaAtiva = "dashboard";
+
+  // ── Fase 1: Persistência ──────────────────────────────────────────
+
+  function criarStatus(valor = "ativo") {
+    return { valor, atualizadoEm: null };
+  }
+
+  function carregarClientes() {
+    const raw = storageGet(STORAGE_KEY);
+    if (raw) {
+      try {
+        clientes = JSON.parse(raw);
+        proximoId = clientes.reduce((max, c) => Math.max(max, c.id), 0) + 1;
+        return;
+      } catch (_) { /* fallback abaixo */ }
+    }
+    clientes = CLIENTES_INICIAIS.map(c => ({
+      ...c,
+      status: criarStatus(c.status.valor),
+    }));
+    proximoId = clientes.reduce((max, c) => Math.max(max, c.id), 0) + 1;
+    salvarClientes();
+  }
+
+  function salvarClientes() {
+    storageSet(STORAGE_KEY, JSON.stringify(clientes));
+    if (estaLogado()) atualizarDashboard();
+  }
+
+  // ── Renderização CRM ──────────────────────────────────────────────
 
   function render() {
     const tbody = document.getElementById("tbody");
@@ -148,6 +277,7 @@
 
     for (const c of clientes) {
       const tr = document.createElement("tr");
+      tr.className = "border-b border-slate-100 last:border-0 hover:bg-slate-50";
 
       const icone = c.status.valor === "inadimplente" ? "⚠ " : "";
       const options = STATUS.map(s =>
@@ -155,10 +285,27 @@
       ).join("");
 
       tr.innerHTML = `
-        <td><span class="nome">${c.nome}</span></td>
-        <td>${c.plano}</td>
-        <td><span class="badge ${c.status.valor}">${icone}${rotulo[c.status.valor]}</span></td>
-        <td><select data-id="${c.id}">${options}</select></td>
+        <td class="px-4 py-3"><span class="font-medium text-slate-900">${c.nome}</span></td>
+        <td class="px-4 py-3 text-slate-600">${c.plano}</td>
+        <td class="px-4 py-3">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${BADGE_CLASSES[c.status.valor]}">
+            ${icone}${rotulo[c.status.valor]}
+          </span>
+        </td>
+        <td class="px-4 py-3">
+          <select data-id="${c.id}"
+            class="text-sm border border-slate-300 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-brand">
+            ${options}
+          </select>
+        </td>
+        <td class="px-4 py-3">
+          <button data-excluir="${c.id}" title="Excluir"
+            class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </td>
       `;
       tbody.appendChild(tr);
     }
@@ -166,6 +313,8 @@
 
   function mudarStatus(id, novoValor) {
     const cliente = clientes.find(c => c.id === id);
+    if (!cliente) return;
+
     cliente.status.valor = novoValor;
     cliente.status.atualizadoEm = new Date().toLocaleTimeString("pt-BR");
 
@@ -174,15 +323,44 @@
     } else {
       registrarLog(`${cliente.nome} → ${rotulo[novoValor]} (${cliente.status.atualizadoEm})`);
     }
+
+    salvarClientes();
     render();
   }
+
+  // ── Fase 2: CRUD ──────────────────────────────────────────────────
+
+  function adicionarCliente(nome, plano) {
+    const cliente = {
+      id: proximoId++,
+      nome: nome.trim(),
+      plano: plano.trim(),
+      status: criarStatus("ativo"),
+    };
+    clientes.push(cliente);
+    registrarLog(`Cliente adicionado: ${cliente.nome} (${cliente.plano})`);
+    salvarClientes();
+    render();
+  }
+
+  function excluirCliente(id) {
+    const idx = clientes.findIndex(c => c.id === id);
+    if (idx === -1) return;
+    const nome = clientes[idx].nome;
+    clientes.splice(idx, 1);
+    registrarLog(`Cliente excluído: ${nome}`);
+    salvarClientes();
+    render();
+  }
+
+  // ── Logs ──────────────────────────────────────────────────────────
 
   function registrarLog(texto, alerta = false) {
     const box = document.getElementById("log");
     const vazio = box.querySelector(".vazio");
     if (vazio) vazio.remove();
     const linha = document.createElement("div");
-    linha.className = "linha" + (alerta ? " alerta" : "");
+    linha.className = "whitespace-pre-wrap" + (alerta ? " text-red-400" : "");
     linha.textContent = "› " + texto;
     box.prepend(linha);
   }
@@ -192,15 +370,203 @@
     alert("Integração pendente — este é um dos desafios! Veja o TODO em importarClientes().");
   }
 
+  // ── Abas ──────────────────────────────────────────────────────────
+
+  function ativarAba(nome) {
+    abaAtiva = nome;
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      const ativo = btn.dataset.tab === nome;
+      btn.classList.toggle("bg-brand", ativo);
+      btn.classList.toggle("text-white", ativo);
+      btn.classList.toggle("text-slate-300", !ativo);
+      btn.classList.toggle("hover:bg-slate-800", !ativo);
+      btn.classList.toggle("hover:text-white", !ativo);
+    });
+
+    document.querySelectorAll(".tab-panel").forEach(panel => {
+      panel.classList.toggle("hidden", !panel.id.endsWith(nome));
+    });
+
+    if (nome === "dashboard") atualizarDashboard();
+    if (nome === "catalogo" && !catalogoCarregado) carregarCatalogo();
+  }
+
+  // ── Fase 4: Dashboard ─────────────────────────────────────────────
+
+  function contarPorStatus(valor) {
+    return clientes.filter(c => c.status.valor === valor).length;
+  }
+
+  function atualizarDashboard() {
+    const total = clientes.length;
+    const ativos = contarPorStatus("ativo");
+    const inadimplentes = contarPorStatus("inadimplente");
+
+    document.getElementById("stat-total").textContent = total;
+    document.getElementById("stat-ativos").textContent = ativos;
+    document.getElementById("stat-inadimplentes").textContent = inadimplentes;
+
+    const pendentes = contarPorStatus("pendente");
+    const ctx = document.getElementById("chart-status");
+
+    if (chartStatus) chartStatus.destroy();
+
+    chartStatus = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: ["Ativos", "Pendentes", "Inadimplentes"],
+        datasets: [{
+          data: [ativos, pendentes, inadimplentes],
+          backgroundColor: ["#059669", "#d97706", "#dc2626"],
+          borderWidth: 0,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "bottom", labels: { padding: 16, usePointStyle: true } },
+        },
+      },
+    });
+  }
+
+  // ── Fase 3: Catálogo ──────────────────────────────────────────────
+
+  async function carregarCatalogo() {
+    const loading = document.getElementById("catalogo-loading");
+    const erro = document.getElementById("catalogo-erro");
+    const grid = document.getElementById("catalogo-grid");
+
+    try {
+      const res = await fetch("https://fakestoreapi.com/products");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const produtos = await res.json();
+
+      loading.classList.add("hidden");
+      grid.innerHTML = produtos.map(p => `
+        <article class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+          <div class="h-44 p-4 flex items-center justify-center bg-slate-50">
+            <img src="${p.image}" alt="${p.title}" class="max-h-full max-w-full object-contain" loading="lazy" />
+          </div>
+          <div class="p-4 flex flex-col flex-1">
+            <h3 class="text-sm font-medium text-slate-800 line-clamp-2 mb-2">${p.title}</h3>
+            <p class="text-lg font-bold text-brand mt-auto">US$ ${p.price.toFixed(2)}</p>
+          </div>
+        </article>
+      `).join("");
+
+      catalogoCarregado = true;
+    } catch (e) {
+      loading.classList.add("hidden");
+      erro.textContent = "Erro ao carregar produtos: " + e.message;
+      erro.classList.remove("hidden");
+    }
+  }
+
+  // ── Fase 5: Login ─────────────────────────────────────────────────
+
+  function salvarSessao(usuario) {
+    storageSet(SESSION_KEY, JSON.stringify({ usuario, logadoEm: new Date().toISOString() }));
+  }
+
+  function carregarSessao() {
+    const raw = storageGet(SESSION_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function limparSessao() {
+    storageRemove(SESSION_KEY);
+  }
+
+  function mostrarApp(usuario) {
+    document.documentElement.classList.add("sessao-ativa");
+    document.getElementById("login-screen").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    const elUsuario = document.getElementById("usuario-logado");
+    elUsuario.textContent = "Olá, " + usuario;
+    elUsuario.classList.remove("hidden");
+  }
+
+  function mostrarLogin() {
+    document.documentElement.classList.remove("sessao-ativa");
+    document.getElementById("app").classList.add("hidden");
+    document.getElementById("login-screen").classList.remove("hidden");
+    document.getElementById("usuario-logado").classList.add("hidden");
+    document.getElementById("login-form").reset();
+  }
+
+  function entrar(usuario) {
+    if (!usuario) return;
+    salvarSessao(usuario);
+    mostrarApp(usuario);
+    ativarAba("dashboard");
+  }
+
+  function sair() {
+    limparSessao();
+    mostrarLogin();
+  }
+
+  function restaurarSessao() {
+    const sessao = carregarSessao();
+    if (!sessao?.usuario) return false;
+    document.getElementById("login-user").value = sessao.usuario;
+    mostrarApp(sessao.usuario);
+    ativarAba("dashboard");
+    return true;
+  }
+
+  // Restaura sessão imediatamente, antes de qualquer init pesado
+  restaurarSessao();
+
+  // ── Eventos ───────────────────────────────────────────────────────
+
+  document.getElementById("login-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const usuario = document.getElementById("login-user").value.trim();
+    entrar(usuario);
+  });
+
+  document.getElementById("btn-logout").addEventListener("click", sair);
+
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => ativarAba(btn.dataset.tab));
+  });
+
+  document.getElementById("form-cliente").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const nome = document.getElementById("input-nome").value;
+    const plano = document.getElementById("input-plano").value;
+    adicionarCliente(nome, plano);
+    e.target.reset();
+  });
+
   document.getElementById("tbody").addEventListener("change", (e) => {
     if (e.target.matches("select[data-id]")) {
       mudarStatus(Number(e.target.dataset.id), e.target.value);
     }
   });
+
+  document.getElementById("tbody").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-excluir]");
+    if (btn) excluirCliente(Number(btn.dataset.excluir));
+  });
+
   document.getElementById("btn-importar").addEventListener("click", importarClientes);
 
-  document.getElementById("log").innerHTML = '<span class="vazio">Nenhuma ação ainda.</span>';
+  // ── Init ──────────────────────────────────────────────────────────
+
+  carregarClientes();
+  document.getElementById("log").innerHTML = '<span class="vazio text-slate-500">Nenhuma ação ainda.</span>';
   render();
+  if (estaLogado()) atualizarDashboard();
 </script>
 </body>
 </html>

@@ -1,0 +1,30 @@
+Atue como um Desenvolvedor Sênior Vanilla JS. Preciso evoluir este arquivo HTML/JS, mas você tem restrições absolutas de arquitetura:
+1. NÃO use React, Vue ou qualquer framework JS. Mantenha tudo em Vanilla JS puro neste único arquivo.
+2. NÃO adicione build steps (Node, Webpack, Vite). 
+3. Para modernizar o visual, remova o CSS manual atual e injete o Tailwind CSS via CDN (<script src="https://cdn.tailwindcss.com"></script>).
+4. Para o Dashboard, use o Chart.js via CDN.
+5. Crie um sistema simples de abas (Tabs) ou navegação lateral para alternar a visualização entre: Dashboard, CRM (Clientes) e Catálogo.
+
+Execute as seguintes implementações exatamente nesta ordem:
+
+**Fase 1: Correção do Bug e Persistência (Core)**
+- Corrija o bug onde alterar o status de um cliente altera o de todos. Atualmente `statusPadrao` é passado por referência. Garanta que cada cliente tenha seu próprio objeto de status.
+- Implemente persistência real usando `localStorage`. Ao carregar a página, leia do localStorage. Se estiver vazio, use o array inicial. Qualquer alteração (status, adicionar, excluir) deve salvar no localStorage.
+
+**Fase 2: CRUD de Clientes**
+- Na aba CRM, crie um formulário simples (Nome, Plano) para adicionar novos clientes.
+- Adicione um botão/ícone de "Excluir" em cada linha da tabela de clientes.
+
+**Fase 3: Catálogo (API Externa)**
+- Na aba Catálogo, faça um fetch em `https://fakestoreapi.com/products`.
+- Renderize os produtos em um grid de cards usando classes do Tailwind CSS (imagem, título, preço).
+
+**Fase 4: Dashboard Interativo**
+- Na aba Dashboard, crie 3 cards de totais (Total de Clientes, Total Ativos, Total Inadimplentes).
+- Adicione um gráfico de rosca (Doughnut) simples usando Chart.js mostrando a proporção dos status dos clientes.
+
+**Fase 5: Login (Mock)**
+- Crie uma tela de login simples que esconde o sistema principal.
+- Não precisa de autenticação real, apenas um input de usuário/senha que, ao clicar em "Entrar", oculta a div de login e mostra a interface principal.
+
+Refatore o HTML atual para suportar essa estrutura, mantendo a lógica de logs e renderização da tabela que já existe, mas aplicando as classes do Tailwind para um visual limpo e profissional.
