@@ -55,6 +55,7 @@
   }
   button:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
   button:focus-visible { outline: 3px solid #99f6e4; outline-offset: 2px; }
+  button:disabled { cursor: wait; opacity: .7; }
 
   .card {
     background: var(--surface); border: 1px solid var(--line);
@@ -141,6 +142,17 @@
 
   const STATUS = ["ativo", "pendente", "inadimplente"];
   const rotulo = { ativo: "Ativo", pendente: "Pendente", inadimplente: "Inadimplente" };
+  const URL_USUARIOS = "https://fakestoreapi.com/users";
+
+  function formatarNome(usuario, indice) {
+    const nomeCompleto = [usuario.name?.firstname, usuario.name?.lastname]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+    const nome = nomeCompleto || usuario.username || usuario.email || `Cliente ${indice + 1}`;
+
+    return nome.replace(/\b\p{L}/gu, letra => letra.toLocaleUpperCase("pt-BR"));
+  }
 
   function render() {
     const tbody = document.getElementById("tbody");
@@ -190,8 +202,37 @@
   }
 
   async function importarClientes() {
-    registrarLog("TODO: integrar com https://fakestoreapi.com/users");
-    alert("Integração pendente — este é um dos desafios! Veja o TODO em importarClientes().");
+    const botao = document.getElementById("btn-importar");
+    botao.disabled = true;
+    botao.textContent = "Importando...";
+
+    try {
+      const resposta = await fetch(URL_USUARIOS);
+      if (!resposta.ok) {
+        throw new Error(`A API respondeu com o status ${resposta.status}`);
+      }
+
+      const usuarios = await resposta.json();
+      if (!Array.isArray(usuarios) || usuarios.length === 0) {
+        throw new Error("A API não retornou clientes");
+      }
+
+      clientes = usuarios.map((usuario, indice) => ({
+        id: usuario.id ?? indice + 1,
+        nome: formatarNome(usuario, indice),
+        plano: "Básico",
+        status: criarStatusPadrao(),
+      }));
+
+      render();
+      registrarLog(`${clientes.length} clientes importados com sucesso.`);
+    } catch (erro) {
+      console.error("Falha ao importar clientes:", erro);
+      registrarLog(`Falha na importação: ${erro.message}`, true);
+    } finally {
+      botao.disabled = false;
+      botao.textContent = "Importar clientes";
+    }
   }
 
   document.getElementById("tbody").addEventListener("change", (e) => {
