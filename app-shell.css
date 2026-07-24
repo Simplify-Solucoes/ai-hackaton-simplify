@@ -1,113 +1,221 @@
+body.app-page {
+  min-height: 100vh;
+  padding-left: 248px !important;
+  background: #f6f8fa;
+}
+
 .app-topbar {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  inset: 0 auto 0 0;
   z-index: 50;
-  border-bottom: 1px solid #30363d;
-  color: #f0f6fc;
-  background: #24292f;
+  width: 248px;
+  border-right: 1px solid #d0d7de;
+  color: #1f2328;
+  background: #ffffff;
 }
 
 .app-shell-inner {
-  width: min(1180px, calc(100% - 40px));
-  min-height: 64px;
+  min-height: 100%;
   display: flex;
-  align-items: center;
-  gap: 24px;
-  margin-inline: auto;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 18px 14px;
 }
 
 .app-brand {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  color: #fff;
-  font-weight: 720;
-  letter-spacing: -.025em;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 9px;
+  color: #1f2328;
+  font-weight: 750;
+  letter-spacing: -.03em;
   text-decoration: none;
   white-space: nowrap;
 }
 
 .app-brand-mark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: #fff;
+  background: #24292f;
+  box-shadow: 0 5px 14px rgba(31, 35, 40, .13);
+}
+
+.app-brand-mark svg { width: 19px; height: 19px; }
+
+.app-navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 30px;
+}
+
+.app-navigation::before {
+  content: "Workspace";
+  margin: 0 10px 8px;
+  color: #8c959f;
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.app-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 39px;
+  padding: 0 11px;
+  border-radius: 7px;
+  color: #57606a;
+  font-size: .85rem;
+  font-weight: 620;
+  text-decoration: none;
+}
+
+.app-nav-link svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  color: #656d76;
+}
+
+.app-nav-link:hover {
+  color: #1f2328;
+  background: #f6f8fa;
+}
+
+.app-nav-link.active {
+  color: #1f2328;
+  background: #f0f3f6;
+  box-shadow: inset 3px 0 #1f883d;
+}
+
+.app-nav-link.active svg { color: #1f883d; }
+
+.app-home-link { margin-top: 12px; border-top: 1px solid #d8dee4; border-radius: 0 0 7px 7px; }
+
+.app-user {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  margin-top: auto;
+  padding: 13px 8px 0;
+  border-top: 1px solid #d8dee4;
+}
+
+.app-user::before {
+  content: attr(data-user-initial);
   width: 32px;
   height: 32px;
   display: grid;
   place-items: center;
-  border: 1px solid #484f58;
-  border-radius: 8px;
-  background: #30363d;
-}
-
-.app-brand-mark svg { width: 18px; height: 18px; }
-
-.app-navigation {
-  align-self: stretch;
-  display: flex;
-  align-items: stretch;
-  gap: 4px;
-}
-
-.app-nav-link {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 12px;
-  border-radius: 6px;
-  color: #b1bac4;
-  font-size: .86rem;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.app-nav-link:hover { color: #fff; background: rgba(177, 186, 196, .12); }
-
-.app-nav-link.active { color: #fff; }
-.app-nav-link.active::after {
-  content: "";
-  position: absolute;
-  right: 12px;
-  bottom: 0;
-  left: 12px;
-  height: 2px;
-  border-radius: 2px 2px 0 0;
-  background: #f78166;
-}
-
-.app-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: auto;
+  border-radius: 50%;
+  color: #fff;
+  background: #57606a;
+  font-size: .72rem;
+  font-weight: 750;
+  text-transform: uppercase;
 }
 
 .app-username {
-  max-width: 150px;
+  min-width: 0;
   overflow: hidden;
-  color: #b1bac4;
+  color: #1f2328;
   font-size: .78rem;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.app-username::after {
+  content: "Sessão ativa";
+  display: block;
+  margin-top: 1px;
+  color: #8c959f;
+  font-size: .65rem;
+  font-weight: 500;
+}
+
+.app-user .api-status { display: none; }
+
 .app-logout {
-  min-height: 32px;
-  padding: 0 11px;
-  border: 1px solid #484f58;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid #d0d7de;
   border-radius: 6px;
-  color: #f0f6fc;
-  background: transparent;
+  color: #57606a;
+  background: #f6f8fa;
   font: inherit;
-  font-size: .78rem;
-  font-weight: 600;
+  font-size: .7rem;
+  font-weight: 650;
   cursor: pointer;
 }
 
-.app-logout:hover { border-color: #8c959f; background: #30363d; }
-.app-logout:focus-visible { outline: 2px solid #58a6ff; outline-offset: 2px; }
+.app-logout:hover {
+  border-color: #afb8c1;
+  color: #cf222e;
+  background: #fff;
+}
 
-@media (max-width: 680px) {
-  .app-shell-inner { width: min(100% - 24px, 1180px); gap: 10px; }
+.app-logout:focus-visible { outline: 2px solid #0969da; outline-offset: 2px; }
+
+@media (max-width: 820px) {
+  body.app-page { padding-left: 0 !important; }
+
+  .app-topbar {
+    position: sticky;
+    inset: 0 0 auto;
+    width: auto;
+    border-right: 0;
+    border-bottom: 1px solid #d0d7de;
+  }
+
+  .app-shell-inner {
+    width: min(100% - 24px, 1180px);
+    min-height: 58px;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-inline: auto;
+    padding: 7px 0;
+  }
+
+  .app-brand { padding: 0; }
   .app-brand span:last-child { display: none; }
-  .app-navigation { gap: 0; }
-  .app-nav-link { padding-inline: 9px; }
+
+  .app-navigation {
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+    margin: 0;
+  }
+
+  .app-navigation::before { display: none; }
+  .app-nav-link { min-height: 36px; padding-inline: 9px; }
+  .app-nav-link.active { box-shadow: inset 0 -2px #1f883d; }
+  .app-home-link { display: none; }
+
+  .app-user {
+    display: flex;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .app-user::before,
   .app-username { display: none; }
+}
+
+@media (max-width: 480px) {
+  .app-nav-link { font-size: 0; }
+  .app-nav-link svg { width: 19px; height: 19px; }
 }
